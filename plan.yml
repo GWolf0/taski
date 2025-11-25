@@ -1,0 +1,155 @@
+name: Taski
+description: A minimal task tracking app focusing on workflow states.
+
+stack:
+  frontend:
+    - Next.js
+    - React
+    - TailwindCSS
+    - shadcn/ui
+  backend:
+    - Next.js (App Router)
+    - Prisma
+    - PostgreSQL
+    - NextAuth
+
+intent: This project is mainly for learning purposes.
+
+features:
+  - Up to three projects per authenticated account (Free plan)
+  - Local-only offline project for guests (stored in localStorage)
+  - Three states (todo, doing, done) with draggable task items (using dnd-kit)
+  - Project summary view
+  - Minimalistic UI
+
+pages:
+  home:
+    url: "/"
+    features:
+      - Show last created projects (local if guest, DB if auth)
+      - Simple call-to-action (create project / login)
+    tags: [guest, auth]
+
+  login:
+    url: "/login"
+    features:
+      - Login with GitHub / Google / Email+Password
+      - Redirect if already authenticated
+    tags: [guest-only]
+
+  dashboard:
+    url: "/dashboard"
+    features:
+      - Table view of authenticated user's projects
+      - CRUD actions for projects
+    tags: [auth]
+
+  project:
+    url: "/tasks/:id"
+    features:
+      header:
+        - Project title
+        - Manual save button (optional autosave later)
+        - Toggle summary view
+      content:
+        - Three state columns (todo / doing / done)
+        - Draggable tasks (dnd-kit)
+        - Summary overlay containing:
+          - __the_content__
+    tags: [auth]
+
+models:
+  common:
+    JSONType: "{ [key: string]: any }"
+    MError: "{ message?: string, errors?: JSONType } | null | undefined"
+    DOE<T>: "{ data?: T, error: MError }"
+
+  non_db:
+    TaskItem:
+      id: string
+      text: string
+      created_at: date
+
+    ProjectData:
+      v: number
+      items: TaskItem[]
+
+    ProjectSummary:
+      title: string
+      description?: string
+      created_at: date
+      updated_at: date
+      todoCount: number
+      doingCount: number
+      doneCount: number
+      totalCount: number
+
+  db:
+    UserModel:
+      table: users
+      fields:
+        id: string (uuid)
+        name: string
+        email: string
+        password: string (hashed, nullable)
+        auth_provider: string (google | github | email)
+        plan: string (free | pro)
+        last_auth: timestamp
+        meta: json
+        created_at: timestamp
+        updated_at: timestamp
+
+    ProjectModel:
+      table: projects
+      fields:
+        id: string (uuid)
+        title: string
+        description?: string
+        data: json (ProjectData)
+        user_id: string (fk → users.id, cascade delete)
+        created_at: timestamp
+        updated_at: timestamp
+
+key_files:
+  services/requests:
+    description: Server-side action functions for interacting with DB models, and handling auth requests(login, register, logout).
+
+  services/systems:
+    description: App domain logic services.
+    examples:
+      - TaskService (CRUD for tasks)
+      - SaveService (manual & auto-save logic)
+
+  lib/helpers:
+    auth.ts: NextAuth configuration
+    validators.ts: Zod validators (project, task, user)
+    string.ts: string utilities
+    encryption.ts: encryption/decryption utilities
+    localStorage.ts: utils to save/load guest project
+
+  constants:
+    app.ts: app-wide constants
+    limits.ts: free-plan limits (e.g., max projects = 3)
+
+  store:
+    description: Zustand state stores (UI state, tasks state, summary state)
+
+components:
+  layout:
+    - MainLayout
+    - MainHeader
+    - MainFooter
+    - Logo
+
+  client_pages:
+    description: Client-side heavy components for server-rendered pages.
+
+  tasks:
+    - TasksColumn
+    - TaskItemsContainer
+    - TaskItem
+    - ProjectSummaryView
+
+expected_blocks:
+  state_management: zustand
+  drag_and_drop: dnd-kit
