@@ -9,9 +9,7 @@ stack:
     - shadcn/ui
   backend:
     - Next.js (App Router)
-    - Prisma
-    - PostgreSQL
-    - NextAuth
+    - Supabase (Database, Auth)
 
 intent: This project is mainly for learning purposes.
 
@@ -85,7 +83,7 @@ models:
       totalCount: number
 
   db:
-    UserModel:
+    ProfileModel:
       table: users
       fields:
         id: string (uuid)
@@ -120,12 +118,14 @@ key_files:
       - TaskService (CRUD for tasks)
       - SaveService (manual & auto-save logic)
 
-  lib/helpers:
-    auth.ts: NextAuth configuration
+  helpers:
+    supabase.ts: supabase setup
     validators.ts: Zod validators (project, task, user)
     string.ts: string utilities
     encryption.ts: encryption/decryption utilities
     localStorage.ts: utils to save/load guest project
+
+  migrations: sql migrations
 
   constants:
     app.ts: app-wide constants
@@ -134,10 +134,15 @@ key_files:
   store:
     description: Zustand state stores (UI state, tasks state, summary state)
 
+  types: contains types definitions
+
+  .env.local & .env.example: env files
+
 components:
   layout:
     - MainLayout
     - MainHeader
+    - ProjectHeader
     - MainFooter
     - Logo
 

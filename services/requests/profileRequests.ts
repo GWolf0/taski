@@ -1,0 +1,149 @@
+"use server";
+
+import { DOE } from "@/types/common";
+import { AuthUser, ProfileModel } from "@/types/models";
+import { partialUserSchema } from "@/helpers/validators";
+import { supabase } from "@/helpers/supabase";
+import { convertToProfileModel } from "@/helpers/converters";
+import {
+  canDeleteProfile,
+  canGetProfile,
+  canUpdateProfile,
+} from "@/helpers/policies";
+import { filterQuery, PaginatedData } from "@/helpers/query";
+
+/* --------------------------------------------------------
+   GET PROFILE
+---------------------------------------------------------*/
+export async function requestGetProfile(userId: string, authUser: AuthUser): Promise<DOE<ProfileModel>> {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) return { data: null, error: { message: error.message } };
+    if (!data) return { data: null, error: { message: "User not found" } };
+
+    const profile = convertToProfileModel(data);
+    if (!profile) return { data: null, error: { message: "Couldn't convert profile model" } };
+
+    if (!canGetProfile(authUser, profile)) {
+      return { data: null, error: { message: "Unauthorized operation" } };
+    }
+
+    return { data: profile, error: null };
+  } catch (error: any) {
+    console.error("[getUser] Unexpected error:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+
+/* --------------------------------------------------------
+   UPDATE PROFILE — also updates Supabase auth metadata if needed
+---------------------------------------------------------*/
+export async function requestUpdateProfile(profileId: string, formData: FormData, authUser: AuthUser): Promise<DOE<ProfileModel>> {
+  try {
+    if (!canUpdateProfile(authUser, profileId)) {
+      return { data: null, error: { message: "Unauthorized" } };
+    }
+
+    const updates = Object.fromEntries(formData.entries());
+    const parsed = partialUserSchema.safeParse(updates);
+
+    if (!parsed.success) {
+      return {
+        data: null,
+        error: {
+          message: "Validation failed",
+          errors: parsed.error.flatten().fieldErrors,
+        },
+      };
+    }
+
+    const updateData = parsed.data;
+
+    /* --- Update profile table --- */
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", profileId)
+      .select()
+      .single();
+
+    if (error) return { data: null, error: { message: error.message } };
+
+    const profile = convertToProfileModel(data);
+    if (!profile) return { data: null, error: { message: "Couldn't convert profile model" } };
+
+    /* --- Reflect update on Supabase Auth (public.auth.users metadata) --- */
+    // Only update auth metadata fields you care about
+    await supabase.auth.updateUser({
+      data: {
+        name: profile.name,
+        plan: profile.plan,
+      },
+    });
+
+    return { data: profile, error: null };
+  } catch (error: any) {
+    console.error("[updateUser] Unexpected error:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+
+/* --------------------------------------------------------
+   DELETE PROFILE — also deletes Supabase auth user
+---------------------------------------------------------*/
+export async function requestDeleteProfile(profileId: string, authUser: AuthUser): Promise<DOE<null>> {
+  try {
+    if (!canDeleteProfile(authUser, profileId)) {
+      return { data: null, error: { message: "Unauthorized" } };
+    }
+
+    /* 1. Delete profile row */
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", profileId);
+
+    if (profileError) return { data: null, error: { message: profileError.message } };
+
+    /* 2. Delete auth user (needs service-key client) */
+    const admin = supabase.auth.admin;
+    const { error: deleteError } = await admin.deleteUser(profileId);
+
+    if (deleteError) return { data: null, error: { message: deleteError.message } };
+
+    /* 3. Sign out current session if deleting self */
+    if (authUser?.id === profileId) {
+      await supabase.auth.signOut();
+    }
+
+    return { data: null, error: null };
+  } catch (error: any) {
+    console.error("[deleteUser] Unexpected error:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
+
+// request filtered
+export async function requestFilteredProfiles(queryParams: URLSearchParams, authUser: AuthUser, defaultSelect: string = "*"): 
+Promise<DOE<PaginatedData<ProfileModel>>> {
+  try {
+    const filteredData = await filterQuery(supabase.from("profiles"), queryParams, defaultSelect);
+    const profiles: ProfileModel[] = filteredData.data.map(entry => convertToProfileModel(entry)).
+                                    filter(entry => !!entry).filter(entry => canGetProfile(authUser, entry));
+    return {
+      data: { ...filteredData, data: profiles },
+      error: null
+    };
+  } catch (error: any) {
+    console.error("[requestFilteredProfiles] Unexpected error:", error);
+    return { data: null, error: { message: error.message } };
+  }
+}
