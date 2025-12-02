@@ -16,3 +16,4 @@ export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 export const ACTIVE_PROVIDERS: Provider[] = ["github", "google"];
+

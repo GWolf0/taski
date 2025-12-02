@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { AccountPlan } from "@/constants/limits";
 import { ProjectData } from "@/types/tasks";
+import { ProfileModel } from "@/types/models";
+import { Provider } from "@supabase/supabase-js";
 
 // Zod schema for AuthProvider
 const authProviderSchema = z.union([z.literal("google"), z.literal("github"), z.literal("email")]);
@@ -22,7 +24,7 @@ export const profileSchema = z.object({
 });
 
 // Partial Zod schema for ProfileModel (for updates)
-export const partialUserSchema = profileSchema.partial();
+export const partialProfileSchema = profileSchema.partial();
 
 export const taskItemSchema = z.object({
   id: z.string(),

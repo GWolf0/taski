@@ -2,7 +2,7 @@
 
 import { DOE } from "@/types/common";
 import { AuthUser, ProfileModel } from "@/types/models";
-import { partialUserSchema } from "@/helpers/validators";
+import { partialProfileSchema } from "@/helpers/validators";
 import { supabase } from "@/helpers/supabase";
 import { convertToProfileModel } from "@/helpers/converters";
 import {
@@ -50,7 +50,7 @@ export async function requestUpdateProfile(profileId: string, formData: FormData
     }
 
     const updates = Object.fromEntries(formData.entries());
-    const parsed = partialUserSchema.safeParse(updates);
+    const parsed = partialProfileSchema.safeParse(updates);
 
     if (!parsed.success) {
       return {
@@ -99,7 +99,7 @@ export async function requestUpdateProfile(profileId: string, formData: FormData
 /* --------------------------------------------------------
    DELETE PROFILE — also deletes Supabase auth user
 ---------------------------------------------------------*/
-export async function requestDeleteProfile(profileId: string, authUser: AuthUser): Promise<DOE<null>> {
+export async function requestDeleteProfile(profileId: string, authUser: AuthUser): Promise<DOE<boolean>> {
   try {
     if (!canDeleteProfile(authUser, profileId)) {
       return { data: null, error: { message: "Unauthorized" } };
@@ -124,7 +124,7 @@ export async function requestDeleteProfile(profileId: string, authUser: AuthUser
       await supabase.auth.signOut();
     }
 
-    return { data: null, error: null };
+    return { data: true, error: null };
   } catch (error: any) {
     console.error("[deleteUser] Unexpected error:", error);
     return { data: null, error: { message: error.message } };

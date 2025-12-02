@@ -14,15 +14,16 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { Provider } from "@supabase/supabase-js";
+import LoginComp from "@/components/auth/LoginComp";
 
 export default async function LoginPage() {
     
 
     return (
         <MainLayout authUser={null}>
-            <div className="flex justify-center pt-20 pb-10">
-                
-            </div>
+            
+        <LoginComp />
+
         </MainLayout>
     );
 }

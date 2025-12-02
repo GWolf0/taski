@@ -2,6 +2,7 @@ import React from 'react'
 import MainHeader from './MainHeader'
 import MainFooter from './MainFooter'
 import { AuthUser } from '@/types/models'
+import NotificationComp from '../common/NotificationComp'
 
 function MainLayout({ children, header, footer, authUser, innerClasses }: {
     children: React.ReactNode, 
@@ -16,6 +17,9 @@ function MainLayout({ children, header, footer, authUser, innerClasses }: {
             {header ?? (header != null ? <MainHeader /> : null)}
 
             <div className='mx-auto min-h-screen' style={{ width: 'min(100%, 1080)' }}>
+                {/* // notification that gets its text automatically from "?event=value" query param if exists */}
+                <NotificationComp textAutoFromQueryParams />
+
                 {children}
             </div>
 

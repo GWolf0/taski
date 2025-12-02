@@ -6,7 +6,7 @@ export interface ProfileModel {
     id: string,
     name: string,
     email: string,
-    auth_provider: Provider,
+    auth_provider: Partial<Provider> | "email",
     plan: AccountPlan,
     meta?: any,
     last_auth: Date,

@@ -22,6 +22,7 @@ function NewProjectForm({ authUser }: {
 
     // const router = useRouter();
 
+    // on submit
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (!canSumbit) return;
