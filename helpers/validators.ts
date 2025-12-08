@@ -15,7 +15,7 @@ export const profileSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1, "Name is required"),
   email: z.email("Invalid email address"),
-  auth_provider: authProviderSchema,
+  auth_provider: authProviderSchema.default("email"),
   plan: accountPlanSchema.default("free"),
   meta: z.record(z.string(), z.any()).optional(),
   last_auth: z.coerce.date().default(() => new Date()),

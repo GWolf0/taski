@@ -21,35 +21,35 @@ export function canGetProject(user: AuthUser, model: ProjectModel): boolean {
 }
 export function canCreateProject(user: AuthUser, projectsCount: number): boolean {
     const limits = LIMITS(user?.plan ?? "free");
-    return projectsCount + 1 <= limits.maxProjectsCount;
+    return projectsCount >= 0 && projectsCount + 1 <= limits.maxProjectsCount;
 }
 export function canUpdateProject(user: AuthUser, model: ProjectModel): boolean {
-    return user?.id === model.id;
+    return user?.id === model.user_id;
 }
 export function canDeleteProject(user: AuthUser, model: ProjectModel): boolean {
-    return user?.id === model.id;
+    return user?.id === model.user_id;
 }
 
-export class PolicyService {
-    private user: AuthUser;
-    private userLimits: LimitsDef;
+// export class PolicyService {
+//     private user: AuthUser;
+//     private userLimits: LimitsDef;
 
-    constructor(user: AuthUser) {
-        this.user = user;
-        this.userLimits = LIMITS(user?.plan || "free");
-    }
+//     constructor(user: AuthUser) {
+//         this.user = user;
+//         this.userLimits = LIMITS(user?.plan || "free");
+//     }
 
-    isLoggedIn(): boolean {
-        return !!this.user;
-    }
+//     isLoggedIn(): boolean {
+//         return !!this.user;
+//     }
 
-    isProjectOwner(project: ProjectModel): boolean {
-        return this.isLoggedIn() && this.user?.id === project.user_id;
-    }
+//     isProjectOwner(project: ProjectModel): boolean {
+//         return this.isLoggedIn() && this.user?.id === project.user_id;
+//     }
 
-    canCreateProject(currentProjectCount: number): boolean {
-        return this.isLoggedIn() && currentProjectCount < this.userLimits.maxProjectsCount;
-    }
+//     canCreateProject(currentProjectCount: number): boolean {
+//         return this.isLoggedIn() && currentProjectCount < this.userLimits.maxProjectsCount;
+//     }
 
-    // Add more policy checks as needed
-}
+//     // Add more policy checks as needed
+// }

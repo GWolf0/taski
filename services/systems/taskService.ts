@@ -16,10 +16,10 @@ export class TaskService {
     }
   }
 
-  static makeNewProjectInstance(user_id: string): ProjectModel {
+  static makeNewProjectInstance(user_id: string, title: string  = "New Project"): ProjectModel {
     return {
       id: "",
-      title: "New Project",
+      title: title,
       description: undefined,
       data: TaskService.makeNewProjectDataInstance(),
       created_at: new Date(),

@@ -1,27 +1,34 @@
 "use server";
 
-import { DOE } from "@/types/common";
+import { DOE, JSONType } from "@/types/common";
 import { AuthUser, ProfileModel } from "@/types/models";
-import { supabase } from "@/helpers/supabase";
+import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
 import { convertToProfileModel } from "@/helpers/converters";
 import { redirect } from "next/navigation";
 import { Provider, User } from "@supabase/supabase-js";
+import { cache } from "react";
 
 /* --------------------------------------------------------
-   AUTH USER (SERVER) — now uses Supabase session properly
+   AUTH USER
 ---------------------------------------------------------*/
+// export const requestAuthUser = cache(
+//     async (): Promise<User | null> => {
+//         const { data: { user }, error } = await supabaseAdmin.auth.getUser();
+//         return user;
+//     }
+// );
 export async function requestAuthUser(): Promise<User | null> {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
     return user;
 }
 
 export async function requestAuthUserProfile(): Promise<AuthUser> {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
 
     if (error || !user) return null;
 
     // Load profile row
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabaseClient
         .from("profiles")
         .select("*")
         .eq("id", user.id)
@@ -32,16 +39,16 @@ export async function requestAuthUserProfile(): Promise<AuthUser> {
     return convertToProfileModel(profile);
 }
 
-export async function resetPasswordRequest(email: string) {
+export async function requestResetPasswordRequest(email: string) {
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`;
-    return supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    return supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
 }
 
 /* --------------------------------------------------------
    PROFILE SYNC (used in callback + email/password flows)
 ---------------------------------------------------------*/
-export async function syncProfile(authUser: any): Promise<ProfileModel | null> {
-    const existing = await supabase
+export async function syncProfile(authUser: User): Promise<ProfileModel | null> {
+    const existing = await supabaseAdmin
         .from("profiles")
         .select("*")
         .eq("id", authUser.id)
@@ -49,11 +56,11 @@ export async function syncProfile(authUser: any): Promise<ProfileModel | null> {
 
     // If profile does not exist → create it
     if (!existing.data) {
-        const { data: created, error } = await supabase
+        const { data: created, error } = await supabaseAdmin
             .from("profiles")
             .insert({
                 id: authUser.id,
-                name: authUser.user_metadata.name ?? authUser.email,
+                name: authUser.user_metadata.name ?? authUser.email?.split("@")[0] ?? "New User",
                 email: authUser.email,
                 auth_provider: authUser.app_metadata.provider,
                 plan: "free",
@@ -64,13 +71,12 @@ export async function syncProfile(authUser: any): Promise<ProfileModel | null> {
             })
             .select()
             .single();
-
         if (error) throw error;
         return convertToProfileModel(created);
     }
 
     // Otherwise update last_auth
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await supabaseAdmin
         .from("profiles")
         .update({ last_auth: new Date().toISOString() })
         .eq("id", authUser.id)
@@ -85,16 +91,16 @@ export async function syncProfile(authUser: any): Promise<ProfileModel | null> {
    EMAIL + PASSWORD SIGN-UP
 ---------------------------------------------------------*/
 export async function requestSignUpWithPassword(
-    formData: FormData
+    jsonData: JSONType
 ): Promise<DOE<ProfileModel>> {
     try {
-        const { name, email, password } = Object.fromEntries(formData.entries());
+        const { name, email, password } = jsonData;
 
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
             email: email as string,
             password: password as string,
             options: {
-                data: { name },
+                data: { name: name ?? "New User" },
             },
         });
 
@@ -115,11 +121,11 @@ export async function requestSignUpWithPassword(
 /* --------------------------------------------------------
    EMAIL + PASSWORD SIGN-IN
 ---------------------------------------------------------*/
-export async function requestSignInWithPassword(formData: FormData): Promise<DOE<ProfileModel>> {
+export async function requestSignInWithPassword(jsonData: JSONType): Promise<DOE<ProfileModel>> {
     try {
-        const { email, password } = Object.fromEntries(formData.entries());
+        const { email, password } = jsonData;
 
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email as string,
             password: password as string,
         });
@@ -138,7 +144,7 @@ export async function requestSignInWithPassword(formData: FormData): Promise<DOE
    OAUTH SIGN-IN
 ---------------------------------------------------------*/
 export async function requestSignInWithOAuth(provider: Provider) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider,
         options: {
             redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
@@ -154,6 +160,6 @@ export async function requestSignInWithOAuth(provider: Provider) {
    SIGN OUT
 ---------------------------------------------------------*/
 export async function requestSignOut() {
-    await supabase.auth.signOut();
-    redirect("/login");
+    await supabaseClient.auth.signOut();
+    redirect("/");
 }

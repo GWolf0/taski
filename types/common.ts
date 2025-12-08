@@ -4,7 +4,6 @@ export type MError = {
     code?: string,
     message?: string,
     errors?: JSONType,
-    errorKey?: string,
 } | undefined | null;
 
 // Data or error
