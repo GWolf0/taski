@@ -12,13 +12,19 @@ import {
     requestSignInWithPassword,
     requestSignUpWithPassword,
 } from "@/services/requests/authRequests";
-import { Provider } from "@supabase/supabase-js";
+import { createClient, Provider } from "@supabase/supabase-js";
 import { ErrorComp } from "../common/ErrorComp";
 import { APP_NAME } from "@/constants/app";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { credentialsSchema, zodGetFirstErrorMessage } from "@/helpers/validators";
+import { supabaseClient } from "@/helpers/supabase";
 
 function LoginComp() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const router = useRouter();
 
     async function onLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -26,8 +32,16 @@ function LoginComp() {
         setIsLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        const jsonData = Object.fromEntries(formData);
+        const validatedJsonData = credentialsSchema.safeParse(jsonData);
 
-        const { error } = await requestSignInWithPassword(formData);
+        if(validatedJsonData.error) {
+            setError(zodGetFirstErrorMessage(validatedJsonData.error));
+            setIsLoading(false);
+            return;
+        }
+
+        const { data, error } = await requestSignInWithPassword(validatedJsonData.data);
 
         if (error?.message) {
             setError(error.message);
@@ -35,7 +49,7 @@ function LoginComp() {
             return;
         }
 
-        // success → redirect handled by server action
+        router.replace("/dashboard");
     }
 
     async function onRegister(e: React.FormEvent<HTMLFormElement>) {
@@ -44,8 +58,16 @@ function LoginComp() {
         setIsLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        const jsonData = Object.fromEntries(formData);
+        const validatedJsonData = credentialsSchema.safeParse(jsonData);
 
-        const { error } = await requestSignUpWithPassword(formData);
+        if(validatedJsonData.error) {
+            setError(zodGetFirstErrorMessage(validatedJsonData.error));
+            setIsLoading(false);
+            return;
+        }
+
+        const { data, error } = await requestSignUpWithPassword(validatedJsonData.data);
 
         if (error?.message) {
             setError(error.message);
@@ -68,7 +90,7 @@ function LoginComp() {
     }
 
     return (
-        <Card className="w-full max-w-md shadow-lg border">
+        <Card className="w-full max-w-md shadow-lg border" style={{transform: "translateY(-60px)"}}>
             <CardHeader>
                 <CardTitle className="text-center text-2xl font-semibold">
                     Welcome to {APP_NAME.toUpperCase()}
@@ -107,6 +129,12 @@ function LoginComp() {
                             </Button>
                         </form>
 
+                        <div className="flex items-center justify-center">
+                            <Link href={"/auth/forgot-password"} target="_blank">
+                                <Button variant={"link"} className="text-xs">I forgot the password</Button>
+                            </Link>
+                        </div>
+
                         <Separator className="my-6" />
 
                         <div className="space-y-3">
@@ -135,7 +163,7 @@ function LoginComp() {
                     {/* REGISTER FORM */}
                     <TabsContent value="register">
                         <form onSubmit={onRegister} className="space-y-4">
-                            <Input name="name" placeholder="Full Name" required />
+                            <Input name="name" placeholder="Name" required />
                             <Input name="email" type="email" placeholder="Email" required />
                             <Input name="password" type="password" placeholder="Password" required />
 

@@ -1,8 +1,7 @@
 // app/auth/callback/route.ts
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { syncProfile } from "@/services/requests/authRequests";
-import { supabase } from "@/helpers/supabase";
+import { setupSessionCookies, syncProfile } from "@/services/requests/authRequests";
+import { supabaseClient } from "@/helpers/supabase";
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
@@ -13,7 +12,7 @@ export async function GET(request: Request) {
     }
 
     // Exchange auth code for a session
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
 
     if (error || !data?.user) {
         console.error("Auth callback error:", error);
@@ -22,6 +21,8 @@ export async function GET(request: Request) {
 
     // Sync profile with your custom table
     await syncProfile(data.user);
+
+    if(data.session) await setupSessionCookies(data.session);
 
     // Redirect to dashboard (or your home page)
     return NextResponse.redirect(`${requestUrl.origin}/dashboard`);

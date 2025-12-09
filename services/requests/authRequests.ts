@@ -5,27 +5,36 @@ import { AuthUser, ProfileModel } from "@/types/models";
 import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
 import { convertToProfileModel } from "@/helpers/converters";
 import { redirect } from "next/navigation";
-import { Provider, User } from "@supabase/supabase-js";
-import { cache } from "react";
+import { Provider, Session, User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 /* --------------------------------------------------------
    AUTH USER
 ---------------------------------------------------------*/
-// export const requestAuthUser = cache(
-//     async (): Promise<User | null> => {
-//         const { data: { user }, error } = await supabaseAdmin.auth.getUser();
-//         return user;
-//     }
-// );
 export async function requestAuthUser(): Promise<User | null> {
-    const { data: { user }, error } = await supabaseClient.auth.getUser();
+    const cooks = await cookies();
+    let accessToken = cooks.get('sb-access-token')?.value;
+    let refreshToken = cooks.get('sb-refresh-token')?.value;
+
+    if (!accessToken && refreshToken) {
+        const { data: { session }, error } = await supabaseClient.auth.refreshSession({ refresh_token: refreshToken });
+        if (!session) return null;
+        await setupSessionCookies(session);
+        accessToken = session.access_token;
+        refreshToken = session.refresh_token;
+    }
+
+    if (!accessToken) return null;
+
+    supabaseClient.auth.setSession({ access_token: accessToken, refresh_token: refreshToken ?? '' });
+    const { data: { user } } = await supabaseClient.auth.getUser();
     return user;
 }
 
 export async function requestAuthUserProfile(): Promise<AuthUser> {
-    const { data: { user }, error } = await supabaseClient.auth.getUser();
+    const user = await requestAuthUser();
 
-    if (error || !user) return null;
+    if (!user) return null;
 
     // Load profile row
     const { data: profile, error: profileError } = await supabaseClient
@@ -39,7 +48,7 @@ export async function requestAuthUserProfile(): Promise<AuthUser> {
     return convertToProfileModel(profile);
 }
 
-export async function requestResetPasswordRequest(email: string) {
+export async function requestResetPassword(email: string) {
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`;
     return supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
 }
@@ -87,6 +96,34 @@ export async function syncProfile(authUser: User): Promise<ProfileModel | null> 
     return convertToProfileModel(updated);
 }
 
+export async function setupSessionCookies(session: Session) {
+    const cooks = await cookies();
+    cooks.set("sb-access-token", session.access_token,
+        {
+            httpOnly: true,
+            path: '/',
+            sameSite: 'lax',
+            maxAge: session.expires_in,
+            secure: process.env.NODE_ENV === 'production',
+        }
+    );
+    cooks.set("sb-refresh-token", session.refresh_token,
+        {
+            httpOnly: true,
+            path: '/',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            secure: process.env.NODE_ENV === 'production',
+        }
+    );
+}
+
+export async function clearSessionCookies() {
+    const cooks = await cookies();
+    cooks.delete("sb-access-token");
+    cooks.delete("sb-refresh-token");
+}
+
 /* --------------------------------------------------------
    EMAIL + PASSWORD SIGN-UP
 ---------------------------------------------------------*/
@@ -112,6 +149,8 @@ export async function requestSignUpWithPassword(
 
         const profile = await syncProfile(authUser);
 
+        if (data.session) await setupSessionCookies(data.session);
+
         return { data: profile, error: null };
     } catch (e: any) {
         return { data: null, error: { message: e.message } };
@@ -133,6 +172,8 @@ export async function requestSignInWithPassword(jsonData: JSONType): Promise<DOE
         if (error || !data.user) return { data: null, error: { message: "Invalid credentials" } };
 
         const profile = await syncProfile(data.user);
+
+        if (data.session) await setupSessionCookies(data.session);
 
         return { data: profile, error: null };
     } catch (e: any) {
@@ -161,5 +202,6 @@ export async function requestSignInWithOAuth(provider: Provider) {
 ---------------------------------------------------------*/
 export async function requestSignOut() {
     await supabaseClient.auth.signOut();
+    await clearSessionCookies();
     redirect("/");
 }

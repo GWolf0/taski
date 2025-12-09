@@ -1,17 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { resetPasswordRequest } from "@/services/requests/authRequests";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
+import { requestResetPassword } from "@/services/requests/authRequests";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
+    const [wasSent, setWasSent] = useState<boolean>(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
+        if(wasSent) return;
+
         e.preventDefault();
-        await resetPasswordRequest(email);
+        await requestResetPassword(email);
+        setWasSent(true);
+
         alert("If your email exists, a reset link has been sent.");
     };
 
@@ -26,7 +31,7 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                 />
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={wasSent}>
                     Send reset link
                 </Button>
             </form>

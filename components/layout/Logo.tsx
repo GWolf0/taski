@@ -5,7 +5,7 @@ import React from 'react'
 function Logo({size, linkToHome}: {
     size?: number, linkToHome?: boolean,
 }) {
-    const logoPath = LOGO_NAME ?? "logo.png";
+    const logoPath = "/" + (LOGO_NAME ?? "logo.png");
     size = size ?? 32;
 
     function renderLogo(): React.ReactNode {

@@ -43,9 +43,11 @@ export function ErrorComp({ error, title, errorKey }: {
     if (!displayMessage) return null;
 
     return (
-        <Alert variant="destructive" className="mt-2">
-            <i className="bi bi-exclamation-triangle-fill" />
-            <AlertTitle>{title ?? "Error"}</AlertTitle>
+        <Alert variant="destructive" className="my-2">
+            <AlertTitle>
+                <i className="bi bi-exclamation-triangle-fill mr-2" />
+                {title ?? "Error"}
+            </AlertTitle>
             <AlertDescription>{displayMessage}</AlertDescription>
         </Alert>
     );

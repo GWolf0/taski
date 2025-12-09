@@ -54,3 +54,17 @@ export const projectSchema = z.object({
 
 // Partial Zod schema for ProjectModel (for updates)
 export const partialProjectSchema = projectSchema.partial();
+
+// auth credentials
+export const credentialsSchema = z.object({
+  email: z.email().trim(),
+  password: z.string().min(8),
+  name: z.string().trim().optional()
+});
+
+
+// helper fns
+export function zodGetFirstErrorMessage(err: z.ZodError): string | null {
+  if(err.issues.length < 1) return null;
+  return err.issues[0].path + " : " + err.issues[0].message;
+}
