@@ -6,6 +6,7 @@ import { supabaseClient } from "@/helpers/supabase";
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get("code");
+    const redirect = requestUrl.searchParams.get("redirect");
 
     if (!code) {
         return NextResponse.redirect(`${requestUrl.origin}/auth/error?reason=no_code`);
@@ -22,8 +23,12 @@ export async function GET(request: Request) {
     // Sync profile with your custom table
     await syncProfile(data.user);
 
-    if(data.session) await setupSessionCookies(data.session);
+    if (data.session) await setupSessionCookies(data.session);
 
     // Redirect to dashboard (or your home page)
-    return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    if (redirect) {
+        return NextResponse.redirect(`${requestUrl.origin}${redirect}`);
+    } else {
+        return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    }
 }

@@ -35,7 +35,7 @@ function NotificationComp({ text, textAutoFromQueryParams = false, type = "alert
     useEffect(() => {
         if (!finalText) return;
 
-        const timer = setTimeout(() => setVisible(false), 4000);
+        const timer = setTimeout(() => setVisible(false), 8000);
         return () => clearTimeout(timer);
     }, [finalText]);
 

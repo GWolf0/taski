@@ -10,14 +10,10 @@ import { TasksColumnType } from "@/types/tasks";
 const columns: TasksColumnType[] = ["todo", "doing", "done"];
 
 export default function TasksColumnsContainer() {
-    const project = useTasksStore((s) => s.project);
-    const setProject = useTasksStore((s) => s.setProject);
+    const { project, setProject } = useTasksStore();
+    console.log("project", project.data);
 
-    const [collapsed, setCollapsed] = useState<Record<TasksColumnType, boolean>>({
-        todo: false,
-        doing: false,
-        done: false,
-    });
+    const [collapsed, setCollapsed] = useState<Record<TasksColumnType, boolean>>({ todo: false, doing: false, done: false, });
 
     const toggleCollapse = (col: TasksColumnType) => setCollapsed((c) => ({ ...c, [col]: !c[col] }));
 
@@ -36,8 +32,8 @@ export default function TasksColumnsContainer() {
 
         const newColumns = structuredClone(project.data.columns);
 
-        const fromItems = newColumns[from];
-        const toItems = newColumns[to];
+        const fromItems = structuredClone(newColumns[from]);
+        const toItems = structuredClone(newColumns[to]);
 
         const fromIndex = fromItems.findIndex((i) => i.id === fromId);
         const item = fromItems[fromIndex];
@@ -65,7 +61,7 @@ export default function TasksColumnsContainer() {
     };
 
     return (
-        <main className="w-full min-h-screen flex flex-col md:flex-row gap-4 p-4">
+        <main className="w-full flex flex-col md:flex-row gap-4 p-4" style={{ height: "calc(100vh - 60px)" }}>
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 {columns.map((c) => (
                     <SortableContext

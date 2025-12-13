@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Button } from '../ui/button'
 import NewProjectForm from './NewProjectForm'
+import { Separator } from '../ui/separator'
 
 function NewProjectButton({ authUser, disabled }: {
     authUser: AuthUser, disabled: boolean,
@@ -20,7 +21,7 @@ function NewProjectButton({ authUser, disabled }: {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-svw">
+            <DialogContent style={{width: "min(99vw, 480px)"}}>
                 <DialogHeader>
                     <DialogTitle>New Project</DialogTitle>
                     <DialogDescription>
@@ -29,8 +30,10 @@ function NewProjectButton({ authUser, disabled }: {
                 </DialogHeader>
 
                 <div className="w-full">
-                    <NewProjectForm authUser={authUser} />
+                    <NewProjectForm authUser={authUser} onDone={() => setDialogIsOpen(false)} />
                 </div>
+
+                <Separator />
 
                 <DialogFooter>
                     <DialogClose asChild>

@@ -25,7 +25,6 @@ export async function requestCreateProject(jsonData: JSONType, authUser: AuthUse
       return { data: null, error: { message: "Unauthorized, maximum allowed project reached", code: "403" } };
     }
 
-    // const newProjectData = Object.fromEntries(formData.entries());
     const newProjectData = jsonData;
     const parsed = projectSchema.omit({ user_id: true, id: true, created_at: true, updated_at: true }).safeParse(newProjectData);
 
@@ -33,7 +32,7 @@ export async function requestCreateProject(jsonData: JSONType, authUser: AuthUse
       const errors = parsed.error.flatten().fieldErrors;
       return { data: null, error: { message: "Validation failed", errors } };
     }
-
+    
     const { data, error } = await supabaseClient
       .from("projects")
       .insert({ ...parsed.data, user_id: authUser.id, updated_at: new Date().toISOString(), created_at: new Date().toISOString() })
@@ -169,8 +168,9 @@ export async function requestUpdateProject(projectId: string, jsonData: JSONType
 ---------------------------------------------------------*/
 export async function requestDeleteProject(projectId: string, authUser: AuthUser): Promise<DOE<boolean>> {
   try {
+    console.log(`Try deleting project ${projectId}`);
     const projectResp = await requestGetProject(projectId, authUser);
-    if (!projectResp.data) return { data: false, error: { message: "Project not found", code: "403" } };
+    if (!projectResp.data) return { data: false, error: { message: `Project not found | ${projectResp.error?.message}`, code: "404" } };
 
     const project = projectResp.data;
 

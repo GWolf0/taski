@@ -9,9 +9,9 @@ export class TaskService {
     return {
       v: APP_VERSION,
       columns: {
-        "todo": [],
-        "doing": [],
-        "done": [],
+        todo: [],
+        doing: [],
+        done: [],
       }
     }
   }

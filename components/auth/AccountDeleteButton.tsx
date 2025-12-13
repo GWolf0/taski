@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { requestDeleteProfile } from "@/services/requests/profileRequests";
 import { useRouter } from "next/navigation";
 import { ErrorComp } from "../common/ErrorComp";
+import { LoaderCircle } from "lucide-react";
 
 function AccountDeleteButton({ authUser }: { authUser: AuthUser }) {
     const [loading, setLoading] = useState(false);
@@ -19,9 +20,7 @@ function AccountDeleteButton({ authUser }: { authUser: AuthUser }) {
         if (!canSubmit) return;
 
         // small safety confirmation
-        if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-            return;
-        }
+        if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
 
         setLoading(true);
         setError(undefined);
@@ -31,7 +30,7 @@ function AccountDeleteButton({ authUser }: { authUser: AuthUser }) {
         if (result.data) {
             router.push("/?event=account-deleted");
         } else {
-            setError({message: result.error?.message ?? "Error deleting the account."});
+            setError({ message: result.error?.message ?? "Error deleting the account." });
         }
 
         setLoading(false);
@@ -47,7 +46,7 @@ function AccountDeleteButton({ authUser }: { authUser: AuthUser }) {
                 onClick={onSubmit}
             >
                 {loading ? (
-                    <i className="bi bi-arrow-repeat animate-spin" />
+                    <LoaderCircle className="animate-spin" />
                 ) : (
                     <i className="bi bi-x-lg" />
                 )}

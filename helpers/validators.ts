@@ -64,7 +64,7 @@ export const credentialsSchema = z.object({
 
 
 // helper fns
-export function zodGetFirstErrorMessage(err: z.ZodError): string | null {
-  if(err.issues.length < 1) return null;
+export function zodGetFirstErrorMessage(err: z.ZodError | undefined): string {
+  if(err === undefined || err.issues.length < 1) return `Unkown input validation error`;
   return err.issues[0].path + " : " + err.issues[0].message;
 }

@@ -11,6 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
+import DeleteProjectButton from '@/components/dashboard/DeleteProjectButton';
+import Link from 'next/link';
 
 async function DashboardPage() {
     const authUser: AuthUser = await requestAuthUserProfile();
@@ -31,7 +33,7 @@ async function DashboardPage() {
             {/* Top Bar */}
             <section className="flex items-center gap-4 mb-6">
                 <h1 className="text-xl font-semibold">
-                    Projects <span className="text-gray-500">({projects.length})</span>
+                    Projects <span className="text-muted-foreground">({projects.length})</span>
                 </h1>
 
                 <div className="ml-auto">
@@ -66,7 +68,11 @@ async function DashboardPage() {
                                 {projects.map((project) => (
                                     <TableRow key={project.id}>
                                         {/* Title */}
-                                        <TableCell className="font-medium">{project.title}</TableCell>
+                                        <TableCell className="font-medium">
+                                            <Link href={`/tasks/${project.id}`} target='_blank' className='block hover:underline'>
+                                                {project.title}
+                                            </Link>
+                                        </TableCell>
 
                                         {/* Updated At */}
                                         <TableCell>
@@ -82,9 +88,7 @@ async function DashboardPage() {
 
                                         {/* Actions */}
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
+                                            <DeleteProjectButton project={project} authUser={authUser} />
                                         </TableCell>
                                     </TableRow>
                                 ))}

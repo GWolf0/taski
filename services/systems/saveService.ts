@@ -3,6 +3,7 @@ import { DOE } from "@/types/common";
 import { AuthUser, ProjectModel } from "@/types/models";
 import { requestUpdateProject } from "../requests/taskRequests";
 import { convertProjectToFormData } from "@/helpers/converters";
+import { TaskService } from "./taskService";
 
 export default class SaveService {
     static LS_KEY = "TMP_TASKS_PROJECT";
@@ -10,22 +11,35 @@ export default class SaveService {
     // save project
     static async saveProject(project: ProjectModel, authUser: AuthUser): Promise<DOE<ProjectModel>> {
         // save to localstorage if not authenticated
-        if(!authUser) {
+        if (!authUser) {
             SaveService.saveToLS(project);
-            return { data: structuredClone(project), error: null};
+            return { data: structuredClone(project), error: null };
         }
 
         // use requests to save
-        const updateDOE = await requestUpdateProject(project.id, convertProjectToFormData(project), authUser);
+        const updateDOE = await requestUpdateProject(project.id, project, authUser);
 
         return updateDOE;
     }
 
-    // load from localstorage
-    static loadFromLS(): ProjectModel | null {
-        return localStorageLoad(SaveService.LS_KEY);
+    // check if there is a temp project in localstorage
+    static doesTempProjectExists(): boolean {
+        if(!window) return false;
+        return localStorage.getItem(SaveService.LS_KEY) != null;
     }
-    
+
+    // load from localstorage
+    static loadFromLS(): ProjectModel {
+        try {
+            const saved: ProjectModel | null = localStorageLoad<ProjectModel>(SaveService.LS_KEY);
+            if (saved) return saved;
+            else throw new Error(`No temp project saved in localstorage`);
+        } catch (e: any) {
+            console.error(`Couldn't load temp project | ${e.message}`);
+            return TaskService.makeNewProjectInstance("", "New Temp Project");
+        }
+    }
+
     // save to localstorage
     static saveToLS(project: ProjectModel): boolean {
         return localStorageSave(SaveService.LS_KEY, project);

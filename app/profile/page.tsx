@@ -81,10 +81,10 @@ async function ProfilePage() {
 
                     <CardContent className="space-y-4">
 
-                        {/* Update Profile Button (placeholder) */}
+                        {/* Update Profile Button */}
                         <ProfileUpdateButton authUser={authUser} />
 
-                        {/* Delete Account Button (placeholder) */}
+                        {/* Delete Account Button */}
                         <AccountDeleteButton authUser={authUser} />
 
                     </CardContent>

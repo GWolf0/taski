@@ -41,7 +41,7 @@ export function convertToProjectModel(data: any): ProjectModel | null {
             id: data.id,
             title: data.title,
             description: data.description || undefined,
-            data: data.data as ProjectData, // Assuming data.data is already in ProjectData format
+            data: JSON.parse(data.data) as ProjectData, // Assuming data.data is already in ProjectData format
             user_id: data.user_id,
             created_at: new Date(data.created_at),
             updated_at: new Date(data.updated_at),

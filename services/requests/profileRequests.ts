@@ -11,6 +11,7 @@ import {
   canUpdateProfile,
 } from "@/helpers/policies";
 import { filterQuery, PaginatedData } from "@/helpers/query";
+import { requestSignOut } from "./authRequests";
 
 /* --------------------------------------------------------
   GET PROFILE
@@ -113,8 +114,7 @@ export async function requestDeleteProfile(profileId: string, authUser: AuthUser
     if (profileError) return { data: null, error: { message: profileError.message } };
 
     /* 2. Delete auth user (needs service-key client) */
-    const admin = supabaseAdmin.auth.admin;
-    const { error: deleteError } = await admin.deleteUser(profileId);
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(profileId);
 
     if (deleteError) return { data: null, error: { message: deleteError.message } };
 
@@ -123,7 +123,8 @@ export async function requestDeleteProfile(profileId: string, authUser: AuthUser
 
     /* 4. Sign out current session if deleting self */
     if (authUser?.id === profileId) {
-      await supabaseClient.auth.signOut();
+      await requestSignOut();
+      // await supabaseClient.auth.signOut();
     }
 
     return { data: true, error: null };

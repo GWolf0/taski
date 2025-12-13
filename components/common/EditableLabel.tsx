@@ -47,17 +47,17 @@ function EditableLabel({ text, onConfirmed, onCanceled }: {
     return (
         <div className="inline-block">
             {editing ? (
-                <Input
+                <input
                     ref={inputRef}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onBlur={handleCancel}
                     onKeyDown={handleKeyDown}
-                    className="h-8 px-2 py-1 text-sm"
+                    className="h-8 px-2 py-1 text-sm outline-none underline"
                 />
             ) : (
                 <span
-                    className="cursor-pointer select-none hover:bg-muted px-1 rounded-sm transition"
+                    className="cursor-pointer select-none hover:bg-muted px-1 rounded-sm transition text-sm font-medium"
                     onDoubleClick={() => setEditing(true)}
                 >
                     {text}

@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { TasksColumnType, TaskItem } from "@/types/tasks";
 import TaskItemComp from "./TaskItemComp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTasksStore } from "@/store/useTasksStore";
+import { TaskService } from "@/services/systems/taskService";
+import z from "zod";
+import useKey from "@/lib/hooks/useKey";
 
 const labels: Record<TasksColumnType, string> = {
     todo: "To Do",
@@ -19,17 +22,19 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
     const project = useTasksStore((s) => s.project);
     const setProject = useTasksStore((s) => s.setProject);
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const [adding, setAdding] = useState(false);
-    const [text, setText] = useState("");
+    // const [text, setText] = useState("");
 
     const addTask = () => {
-        if (!text.trim()) return;
+        if (!inputRef.current) return;
+        const text: string = inputRef.current.value.trim();
 
-        const newTask: TaskItem = {
-            id: crypto.randomUUID(),
-            text: text.trim(),
-            created_at: new Date(),
-        };
+        const parsed = z.object({ text: z.string().min(1).max(128) }).safeParse({ text: text.trim() });
+        if (parsed.error) return;
+
+        const newTask = TaskService.makeNewTaskItem(parsed.data.text);
 
         const newColumns = structuredClone(project.data.columns);
         newColumns[columnName].push(newTask);
@@ -42,14 +47,25 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
             },
         });
 
-        setText("");
-        setAdding(false);
+        inputRef.current.value = "";
+        inputRef.current.focus();
     };
+
+    // if adding and enter pressed attempt add task
+    useKey("enter", () => {
+        if (adding) addTask();
+    }, [adding, addTask]);
+    // if adding and escape pressed cancel adding
+    useKey("escape", () => {
+        if (adding) setAdding(false);
+    }, [adding]);
 
     return (
         <section className="w-full md:w-1/3 bg-background border rounded-xl p-3 shadow-sm">
-            <header className="flex justify-between items-center mb-3">
-                <h2 className="font-semibold text-lg">{labels[columnName]}</h2>
+            <section className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-lg">
+                    {labels[columnName]} - <span className="text-muted-foreground text-base">({tasks.length})</span>
+                </h2>
 
                 <button
                     onClick={onToggle}
@@ -57,7 +73,7 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
                 >
                     {collapsed ? "Expand" : "Collapse"}
                 </button>
-            </header>
+            </section>
 
             {!collapsed && (
                 <div className="flex flex-col gap-2">
@@ -74,22 +90,25 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
                     ))}
 
                     {adding ? (
-                        <div className="mt-2 flex gap-2">
+                        <div className="mt-2 flex gap-1">
                             <Input
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
+                                ref={inputRef}
+                                // value={text}
+                                // onChange={(e) => setText(e.target.value)}
                                 placeholder="Task description..."
-                                className="h-8"
+                                className="h-8 text-sm"
+                                autoFocus
                             />
-                            <Button size="sm" onClick={addTask}>
-                                Add
+                            <Button size="icon-sm" onClick={addTask} title="[enter]">
+                                <i className="bi bi-plus-lg"></i>
                             </Button>
                             <Button
-                                size="sm"
+                                size="icon-sm"
                                 variant="ghost"
                                 onClick={() => setAdding(false)}
+                                title="[escape]"
                             >
-                                Cancel
+                                <i className="bi bi-x-lg"></i>
                             </Button>
                         </div>
                     ) : (

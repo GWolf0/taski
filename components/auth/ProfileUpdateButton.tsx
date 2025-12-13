@@ -11,7 +11,8 @@ import { requestUpdateProfile } from "@/services/requests/profileRequests";
 import { AuthUser, ProfileModel } from "@/types/models";
 import { DOE } from "@/types/common";
 import { useRouter } from "next/navigation";
-import { partialProfileSchema } from "@/helpers/validators";
+import { partialProfileSchema, zodGetFirstErrorMessage } from "@/helpers/validators";
+import { Separator } from "../ui/separator";
 
 function ProfileUpdateButton({ authUser }: { authUser: AuthUser }) {
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
@@ -33,14 +34,15 @@ function ProfileUpdateButton({ authUser }: { authUser: AuthUser }) {
 
         const parsed = partialProfileSchema.safeParse(newProfileData);
         if (!parsed.success) {
-            setError({ message: parsed.error.message ?? "Invalid input" });
+            setError({ message: zodGetFirstErrorMessage(parsed.error) ?? "Invalid input" });
             setLoading(false);
             return;
         }
 
-        const res: DOE<ProfileModel> = await requestUpdateProfile(authUser!.id, fd, authUser);
+        const res: DOE<ProfileModel> = await requestUpdateProfile(authUser!.id, parsed.data, authUser);
 
         if (res.data) {
+            setDialogIsOpen(false);
             router.push("/profile?event=profile-updated");
         } else {
             setError({ message: res.error?.message ?? "Error updating the profile" });
@@ -58,7 +60,7 @@ function ProfileUpdateButton({ authUser }: { authUser: AuthUser }) {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-svw">
+            <DialogContent className="" style={{width: "min(99vw, 480px)"}}>
                 <DialogHeader>
                     <DialogTitle>Update Profile</DialogTitle>
                     <DialogDescription>Change your profile details.</DialogDescription>
@@ -67,19 +69,20 @@ function ProfileUpdateButton({ authUser }: { authUser: AuthUser }) {
                 <form onSubmit={onSubmit} className="flex flex-col gap-4 w-full">
                     <ErrorComp error={error} />
 
-                    <div>
-                        <Label>Name</Label>
+                    <div className="space-y-1">
+                        <Label className="text-xs">Name</Label>
                         <Input
                             name="name"
                             minLength={3}
                             maxLength={64}
                             defaultValue={authUser?.name}
                             disabled={!canSubmit}
+                            required
                         />
                     </div>
 
                     <div className="flex justify-end gap-2">
-                        <Button type="reset" disabled={!canSubmit}>
+                        <Button type="reset" disabled={!canSubmit} variant={"secondary"}>
                             Reset
                         </Button>
                         <Button type="submit" disabled={!canSubmit}>
@@ -88,6 +91,8 @@ function ProfileUpdateButton({ authUser }: { authUser: AuthUser }) {
                         </Button>
                     </div>
                 </form>
+
+                <Separator />
 
                 <DialogFooter>
                     <DialogClose asChild>

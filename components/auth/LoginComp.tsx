@@ -26,6 +26,10 @@ function LoginComp() {
 
     const router = useRouter();
 
+    // get optional redirect query param, for optional redirect after successful login
+    const queryParams = new URLSearchParams(location.href);
+    const redirect: string | null = queryParams.get("redirect");
+
     async function onLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setError(null);
@@ -43,13 +47,13 @@ function LoginComp() {
 
         const { data, error } = await requestSignInWithPassword(validatedJsonData.data);
 
-        if (error?.message) {
-            setError(error.message);
+        if (error) {
+            setError(error.message ?? `Error signing in`);
             setIsLoading(false);
             return;
         }
 
-        router.replace("/dashboard");
+        router.replace(redirect ? `/${redirect}` : "/dashboard");
     }
 
     async function onRegister(e: React.FormEvent<HTMLFormElement>) {
@@ -69,11 +73,13 @@ function LoginComp() {
 
         const { data, error } = await requestSignUpWithPassword(validatedJsonData.data);
 
-        if (error?.message) {
-            setError(error.message);
+        if (error) {
+            setError(error.message ?? `Error signing up`);
             setIsLoading(false);
             return;
         }
+
+        router.replace(redirect ? `/${redirect}` : "/dashboard");
     }
 
     async function onOAuth(provider: Provider) {
@@ -81,7 +87,8 @@ function LoginComp() {
         setError(null);
 
         try {
-            await requestSignInWithOAuth(provider);
+            // pass redirect if exists
+            await requestSignInWithOAuth(provider, { queryParams: redirect ? `redirect=${redirect}` : undefined });
             // redirect happens server-side
         } catch (e: any) {
             setError("OAuth failed");

@@ -8,7 +8,7 @@ export interface ProfileModel {
     email: string,
     auth_provider: Partial<Provider> | "email",
     plan: AccountPlan,
-    meta?: any,
+    meta?: { avatar_url?: string },
     last_auth: Date,
     created_at: Date,
     updated_at: Date,

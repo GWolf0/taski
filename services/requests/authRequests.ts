@@ -69,11 +69,11 @@ export async function syncProfile(authUser: User): Promise<ProfileModel | null> 
             .from("profiles")
             .insert({
                 id: authUser.id,
-                name: authUser.user_metadata.name ?? authUser.email?.split("@")[0] ?? "New User",
+                name: authUser.user_metadata.name ?? authUser.user_metadata.full_name ?? authUser.email?.split("@")[0] ?? "New User",
                 email: authUser.email,
                 auth_provider: authUser.app_metadata.provider,
                 plan: "free",
-                meta: {},
+                meta: { avatar_url: authUser.user_metadata.avatar_url },
                 last_auth: new Date().toISOString(),
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -184,11 +184,14 @@ export async function requestSignInWithPassword(jsonData: JSONType): Promise<DOE
 /* --------------------------------------------------------
    OAUTH SIGN-IN
 ---------------------------------------------------------*/
-export async function requestSignInWithOAuth(provider: Provider) {
+export async function requestSignInWithOAuth(provider: Provider, options?: { queryParams?: string }) {
+    let redirectUrl: string = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`;
+    if(options?.queryParams) redirectUrl = `${redirectUrl}?${options.queryParams}`;
+
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider,
         options: {
-            redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
+            redirectTo: redirectUrl,
         },
     });
 
@@ -203,5 +206,4 @@ export async function requestSignInWithOAuth(provider: Provider) {
 export async function requestSignOut() {
     await supabaseClient.auth.signOut();
     await clearSessionCookies();
-    redirect("/");
 }
