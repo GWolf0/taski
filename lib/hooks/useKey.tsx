@@ -1,22 +1,49 @@
-import React, { useEffect } from 'react'
+'use client'
 
-// A custom hook to perfrom an action on particular key down
-function useKey(key: string, callback: () => any, deps: any[]) {
+import { useEffect } from 'react'
 
+type ModifierKey = 'ctrl' | 'shift' | 'alt';
+
+// A custom hook to perform an action on particular key down
+function useKey(key: string, callback: () => void, deps: any[] = [], secondaryKey?: ModifierKey, preventDefault?: boolean) {
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
-            // console.log(e.key);
-            if (e.key.toUpperCase() === key.toUpperCase()) {
+            if (!e.key) return;
+
+            const mainKeyMatch = e.key.toUpperCase() === key.toUpperCase();
+
+            if (!mainKeyMatch) return;
+
+            // Ignore inputs / editable fields
+            const target = e.target as HTMLElement
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+
+            // No modifier required
+            if (!secondaryKey) {
+                if (preventDefault) e.preventDefault();
                 callback();
+                return;
             }
+
+            const modifierMatch =
+                (secondaryKey === 'ctrl' && (e.ctrlKey || e.metaKey)) ||
+                (secondaryKey === 'shift' && e.shiftKey) ||
+                (secondaryKey === 'alt' && e.altKey);
+
+            if (!modifierMatch) return;
+
+            if (preventDefault) e.preventDefault();
+            callback();
         }
 
-        window.addEventListener("keydown", onKey);
+        if (typeof window !== 'undefined') window.addEventListener('keydown', onKey);
 
         return () => {
-            window.removeEventListener("keydown", onKey);
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('keydown', onKey);
+            }
         }
-    }, [...deps]);
+    }, [key, secondaryKey, preventDefault, callback, ...deps]);
 
 }
 

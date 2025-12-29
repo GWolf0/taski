@@ -32,7 +32,7 @@ export class TaskService {
     return {
       id: nanoid(),
       text,
-      created_at: new Date(),
+      created_at: Date.now(),
     }
   }
 

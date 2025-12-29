@@ -10,6 +10,8 @@ import { Button } from "../ui/button";
 export default function TaskItemComp({ item, columnName, }: {
     item: TaskItem; columnName: TasksColumnType
 }) {
+    const { triggerTaskItemEdit, deleteTaskItem, moveTaskItem, selectedTask } = useTasksStore();
+
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({
             id: `${columnName}:${item.id}`,
@@ -22,24 +24,40 @@ export default function TaskItemComp({ item, columnName, }: {
 
     function renderTaskTools(): React.ReactNode {
         return (
-            <div className="w-full bg-muted flex items-center justify-between gap-0.5 h-6">
+            <div className={"w-full bg-muted flex items-center justify-between gap-0.5 h-6"}>
                 <div>
-                    <Button size={"sm"} className="h-6 text-xs hover:underline text-muted-foreground" variant={"ghost"} title="add sub-item">
+                    {/* // Not Today */}
+                    {/* <Button size={"sm"} className="h-6 text-xs hover:underline text-muted-foreground" variant={"ghost"} title="add sub-item">
                         <i className="bi bi-plus-lg"></i> subitem
-                    </Button>
+                    </Button> */}
+                    <p className="text-xs scale-75 text-muted-foreground">
+                        {new Date(item.created_at).toISOString().substring(0, 10)}
+                    </p>
                 </div>
-                
+
                 <div>
-                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="move left">
+                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="move left"
+                        onClick={() =>
+                            moveTaskItem(item.id, columnName, columnName === "done" ? "doing" : columnName === "doing" ? "todo" : "todo")
+                        }
+                    >
                         <i className="bi bi-arrow-left"></i>
                     </Button>
-                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="move right">
+                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="move right"
+                        onClick={() =>
+                            moveTaskItem(item.id, columnName, columnName === "todo" ? "doing" : columnName === "doing" ? "done" : "done")
+                        }
+                    >
                         <i className="bi bi-arrow-right"></i>
                     </Button>
-                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="edit">
+                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="edit"
+                        onClick={() => triggerTaskItemEdit({ id: item.id, column: columnName })}
+                    >
                         <i className="bi bi-pen"></i>
                     </Button>
-                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="remove">
+                    <Button size={"icon-sm"} className="h-6 text-xs text-muted-foreground" variant={"ghost"} title="remove"
+                        onClick={() => deleteTaskItem(item.id)}
+                    >
                         <i className="bi bi-x-lg"></i>
                     </Button>
                 </div>
@@ -52,14 +70,15 @@ export default function TaskItemComp({ item, columnName, }: {
             ref={setNodeRef}
             style={style}
             {...attributes}
-            {...listeners}
-            className={`bg-card border rounded-lg shadow-sm text-sm cursor-grab active:cursor-grabbing select-none overflow-hidden`}
+            className={`bg-card border rounded-lg shadow-sm text-sm cursor-grab active:cursor-grabbing select-none overflow-hidden ${selectedTask?.id === item.id && "border-primary"}`}
         >
-            <p className="w-full p-3 text-sm md:text-sm">
+            <p className="w-full p-3 text-sm md:text-sm"
+                {...listeners}
+            >
                 {item.text}
             </p>
 
-            { renderTaskTools() }
+            {renderTaskTools()}
         </div>
     );
 }

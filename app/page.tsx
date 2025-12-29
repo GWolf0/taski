@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout'
-import { requestAuthUserProfile } from '@/services/requests/authRequests';
+import { requestAuthUser, requestAuthUserProfile } from '@/services/requests/authRequests';
 import { AuthUser } from '@/types/models'
 import React from 'react'
 

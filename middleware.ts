@@ -4,6 +4,7 @@ import { NextResponse, NextRequest } from 'next/server'
 import { AUTH_REDIRECT, GUEST_REDIRECT } from '@/constants/routes';
 // import { requestAuthUser } from './services/requests/authRequests';
 import { User } from '@supabase/supabase-js';
+import { requestAuthUser } from './services/requests/authRequests';
 
 export async function middleware(request: NextRequest) {
     const res = NextResponse.next();
@@ -19,9 +20,9 @@ export async function middleware(request: NextRequest) {
             return NextResponse.next();
         }
 
-        // const user: User | null = await requestAuthUser();
-        const user: User | null = null;
-        console.log("Auth user", user);
+        const user: User | null = await requestAuthUser();
+        // const user: User | null = null;
+        // console.log("Auth user", user);
         const isLoggedIn = !!user;
 
         // Pages that require auth

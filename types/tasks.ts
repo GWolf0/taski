@@ -1,7 +1,7 @@
 export interface TaskItem {
     id: string,
     text: string,
-    created_at: Date,
+    created_at: number, // timestamp
 }
 
 export type TasksColumnType = "todo" | "doing" | "done";

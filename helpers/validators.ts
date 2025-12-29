@@ -1,8 +1,22 @@
 import { z } from "zod";
 import { AccountPlan } from "@/constants/limits";
-import { ProjectData } from "@/types/tasks";
+import { ProjectData, TaskItem } from "@/types/tasks";
 import { ProfileModel } from "@/types/models";
 import { Provider } from "@supabase/supabase-js";
+
+const TRUSTED_EMAIL_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "yahoo.com",
+  "icloud.com",
+  "me.com",
+  "proton.me",
+  "protonmail.com",
+  "zoho.com",
+];
 
 // Zod schema for AuthProvider
 const authProviderSchema = z.union([z.literal("google"), z.literal("github"), z.literal("email")]);
@@ -14,7 +28,12 @@ const accountPlanSchema = z.union([z.literal("free"), z.literal("pro")]);
 export const profileSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1, "Name is required"),
-  email: z.email("Invalid email address"),
+  email: z.email().refine((email) => {
+    const domain = email.split("@")[1]?.toLowerCase();
+    return TRUSTED_EMAIL_DOMAINS.includes(domain);
+  }, {
+    message: "Please use a supported email provider",
+  }),
   auth_provider: authProviderSchema.default("email"),
   plan: accountPlanSchema.default("free"),
   meta: z.record(z.string(), z.any()).optional(),
@@ -26,10 +45,10 @@ export const profileSchema = z.object({
 // Partial Zod schema for ProfileModel (for updates)
 export const partialProfileSchema = profileSchema.partial();
 
-export const taskItemSchema = z.object({
+export const taskItemSchema: z.ZodType<TaskItem> = z.object({
   id: z.string(),
   text: z.string(),
-  created_at: z.coerce.date(),
+  created_at: z.number(),
 });
 
 export const projectDataSchema: z.ZodType<ProjectData> = z.object({
@@ -65,6 +84,6 @@ export const credentialsSchema = z.object({
 
 // helper fns
 export function zodGetFirstErrorMessage(err: z.ZodError | undefined): string {
-  if(err === undefined || err.issues.length < 1) return `Unkown input validation error`;
+  if (err === undefined || err.issues.length < 1) return `Unkown input validation error`;
   return err.issues[0].path + " : " + err.issues[0].message;
 }

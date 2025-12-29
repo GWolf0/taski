@@ -19,13 +19,13 @@ async function ProfilePage() {
             <div className="space-y-8">
 
                 {/* Page Title */}
-                <div>
+                <div className='text-center'>
                     <h1 className="text-2xl font-bold">Your Profile</h1>
                     <p className="text-muted-foreground">Manage your personal information and preferences.</p>
                 </div>
 
                 {/* Profile Info Card */}
-                <Card className="max-w-2xl">
+                <Card className="max-w-2xl mx-auto">
                     <CardHeader>
                         <CardTitle>Account Information</CardTitle>
                     </CardHeader>
@@ -74,7 +74,7 @@ async function ProfilePage() {
                 </Card>
 
                 {/* Actions */}
-                <Card className="max-w-2xl">
+                <Card className="max-w-2xl mx-auto">
                     <CardHeader>
                         <CardTitle>Actions</CardTitle>
                     </CardHeader>

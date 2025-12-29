@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TasksColumnType, TaskItem } from "@/types/tasks";
 import TaskItemComp from "./TaskItemComp";
 import { Button } from "@/components/ui/button";
@@ -19,13 +19,16 @@ const labels: Record<TasksColumnType, string> = {
 export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: {
     columnName: TasksColumnType; tasks: TaskItem[]; collapsed: boolean; onToggle: () => void
 }) {
-    const project = useTasksStore((s) => s.project);
-    const setProject = useTasksStore((s) => s.setProject);
+    const { project, setProject, editSelectedTaskItem, selectedTask, triggerTaskItemEdit } = useTasksStore();
 
     const inputRef = useRef<HTMLInputElement>(null);
 
     const [adding, setAdding] = useState(false);
-    // const [text, setText] = useState("");
+
+    useEffect(() => {
+        // if selectedTask is not undefinded (means a task is selected for edit), then turn adding off
+        if (selectedTask != undefined) setAdding(false);
+    }, [selectedTask]);
 
     const addTask = () => {
         if (!inputRef.current) return;
@@ -45,20 +48,32 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
                 ...project.data,
                 columns: newColumns,
             },
-        });
+        }, true);
 
         inputRef.current.value = "";
         inputRef.current.focus();
     };
 
+    function editTask() {
+        if (!inputRef.current) return;
+        const text: string = inputRef.current.value.trim();
+
+        const parsed = z.object({ text: z.string().min(1).max(128) }).safeParse({ text: text.trim() });
+        if (parsed.error) return;
+
+        editSelectedTaskItem(parsed.data.text);
+    }
+
     // if adding and enter pressed attempt add task
     useKey("enter", () => {
         if (adding) addTask();
-    }, [adding, addTask]);
+        if (selectedTask != undefined) editTask();
+    }, [adding, selectedTask, addTask]);
     // if adding and escape pressed cancel adding
     useKey("escape", () => {
         if (adding) setAdding(false);
-    }, [adding]);
+        if (selectedTask != undefined) triggerTaskItemEdit(undefined);
+    }, [adding, selectedTask]);
 
     return (
         <section className="w-full md:w-1/3 bg-background border rounded-xl p-3 shadow-sm">
@@ -89,23 +104,29 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
                         />
                     ))}
 
-                    {adding ? (
+                    {adding || (selectedTask != undefined && selectedTask.column === columnName) ? (
                         <div className="mt-2 flex gap-1">
                             <Input
                                 ref={inputRef}
-                                // value={text}
-                                // onChange={(e) => setText(e.target.value)}
-                                placeholder="Task description..."
+                                placeholder={adding ? "Task description..." : "Edit task"}
                                 className="h-8 text-sm"
+                                defaultValue={tasks.find(t => t.id === selectedTask?.id)?.text}
                                 autoFocus
                             />
-                            <Button size="icon-sm" onClick={addTask} title="[enter]">
-                                <i className="bi bi-plus-lg"></i>
+                            <Button size="icon-sm"
+                                onClick={() => { if (adding) addTask(); else editTask(); }}
+                                title="[enter]"
+                            >
+                                {adding ?
+                                    <i className="bi bi-plus-lg"></i>
+                                    :
+                                    <i className="bi bi-pencil"></i>
+                                }
                             </Button>
                             <Button
                                 size="icon-sm"
                                 variant="ghost"
-                                onClick={() => setAdding(false)}
+                                onClick={() => { if (adding) setAdding(false); else triggerTaskItemEdit(undefined); }}
                                 title="[escape]"
                             >
                                 <i className="bi bi-x-lg"></i>

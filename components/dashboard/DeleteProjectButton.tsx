@@ -20,7 +20,6 @@ function DeleteProjectButton({ project, authUser }: {
         setLoading(true);
         setError(undefined);
 
-        console.log(`try delete p: ${project.id}`);
         const deleteSuccessDoe: DOE<boolean> = await requestDeleteProject(project.id, authUser);
 
         if (deleteSuccessDoe.data) {

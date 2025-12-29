@@ -11,7 +11,6 @@ const columns: TasksColumnType[] = ["todo", "doing", "done"];
 
 export default function TasksColumnsContainer() {
     const { project, setProject } = useTasksStore();
-    console.log("project", project.data);
 
     const [collapsed, setCollapsed] = useState<Record<TasksColumnType, boolean>>({ todo: false, doing: false, done: false, });
 

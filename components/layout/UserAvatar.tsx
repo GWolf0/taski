@@ -5,7 +5,8 @@ import { AuthUser } from '@/types/models'
 function UserAvatar({ authUser }: {
     authUser: AuthUser,
 }) {
-    const AVATAR_FALLBACK_URL = "https://github.com/shadcn.png";
+    // const AVATAR_FALLBACK_URL = "https://github.com/shadcn.png";
+    const AVATAR_FALLBACK_URL = "./images/profile_pic.png";
 
     return (
         <Avatar>

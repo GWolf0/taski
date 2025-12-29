@@ -33,7 +33,7 @@ async function DashboardPage() {
             {/* Top Bar */}
             <section className="flex items-center gap-4 mb-6">
                 <h1 className="text-xl font-semibold">
-                    Projects <span className="text-muted-foreground">({projects.length})</span>
+                    Projects <span className="text-muted-foreground">({projects.length}/{limits.maxProjectsCount})</span>
                 </h1>
 
                 <div className="ml-auto">
