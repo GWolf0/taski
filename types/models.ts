@@ -2,11 +2,14 @@ import { AccountPlan } from "@/constants/limits";
 import { ProjectData } from "./tasks";
 import { Provider } from "@supabase/supabase-js";
 
+export type AuthProvider = Partial<Provider> | "email" | "unknown";
+
 export interface ProfileModel {
     id: string,
     name: string,
     email: string,
-    auth_provider: Partial<Provider> | "email",
+    providers: AuthProvider[], // list of providers of the same user (email)
+    auth_provider: AuthProvider, // last used provider
     plan: AccountPlan,
     meta?: { avatar_url?: string },
     last_auth: Date,

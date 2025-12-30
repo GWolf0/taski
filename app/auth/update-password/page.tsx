@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { supabase } from "@/helpers/supabase";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layout/MainLayout";
+import { supabaseClient } from "@/helpers/supabase";
+import { MError } from "@/types/common";
+import { ErrorComp } from "@/components/common/ErrorComp";
+import { PasswordValidation, zodGetFirstErrorMessage } from "@/helpers/validators";
 
 export default function UpdatePasswordPage() {
     const params = useSearchParams();
@@ -13,14 +16,48 @@ export default function UpdatePasswordPage() {
 
     const [password, setPassword] = useState("");
     const [done, setDone] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<MError>(null);
+
+    useEffect(() => {
+        if (!code) {
+            setError({ message: "Invalid password reset link." });
+            setLoading(false);
+            return;
+        }
+
+        supabaseClient.auth
+            .exchangeCodeForSession(code)
+            .then(({ error }) => {
+                if (error) setError({ message: error.message });
+            })
+            .finally(() => setLoading(false));
+    }, [code]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const { error } = await supabase.auth.updateUser({ password });
-        if (error) alert(error.message);
+        const validated = PasswordValidation.safeParse(password);
+        if (!validated.data) {
+            setError({ message: zodGetFirstErrorMessage(validated.error) });
+            return;
+        }
+
+        const { error } = await supabaseClient.auth.updateUser({ password: validated.data });
+
+        if (error) setError({ message: error.message });
         else setDone(true);
     };
+
+    if (loading) {
+        return <div className="text-center pt-20">Validating reset link…</div>;
+    }
+
+    if (error) {
+        return (
+            <ErrorComp error={error} />
+        );
+    }
 
     if (done) {
         return (
@@ -33,12 +70,18 @@ export default function UpdatePasswordPage() {
 
     return (
         <MainLayout authUser={null}>
-            <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto pt-20">
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-4 max-w-sm mx-auto pt-20"
+            >
                 <Input
                     type="password"
                     placeholder="New password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
+                    maxLength={20}
+                    required
                 />
 
                 <Button type="submit" className="w-full">

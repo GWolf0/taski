@@ -18,8 +18,30 @@ const TRUSTED_EMAIL_DOMAINS = [
   "zoho.com",
 ];
 
+// password validation
+export const PasswordValidation = z.string()
+  .min(8, { message: "Password must be at least 8 characters long" })
+  .max(20, { message: "Password must be at most 20 characters long" })
+  .refine((password) => /[A-Z]/.test(password), {
+    message: "Password must contain at least one uppercase letter",
+  })
+  .refine((password) => /[a-z]/.test(password), {
+    message: "Password must contain at least one lowercase letter",
+  })
+  .refine((password) => /[0-9]/.test(password), {
+    message: "Password must contain at least one number",
+  });
+
+// email validation
+export const EmailValidation = z.email().refine((email) => {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return TRUSTED_EMAIL_DOMAINS.includes(domain);
+}, {
+  message: "Please use a supported email provider",
+});
+
 // Zod schema for AuthProvider
-const authProviderSchema = z.union([z.literal("google"), z.literal("github"), z.literal("email")]);
+const authProviderSchema = z.union([z.literal("unknown"), z.literal("google"), z.literal("github"), z.literal("email")]);
 
 // Zod schema for AccountPlan
 const accountPlanSchema = z.union([z.literal("free"), z.literal("pro")]);
@@ -28,12 +50,8 @@ const accountPlanSchema = z.union([z.literal("free"), z.literal("pro")]);
 export const profileSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1, "Name is required"),
-  email: z.email().refine((email) => {
-    const domain = email.split("@")[1]?.toLowerCase();
-    return TRUSTED_EMAIL_DOMAINS.includes(domain);
-  }, {
-    message: "Please use a supported email provider",
-  }),
+  email: EmailValidation,
+  providers: z.array(authProviderSchema),
   auth_provider: authProviderSchema.default("email"),
   plan: accountPlanSchema.default("free"),
   meta: z.record(z.string(), z.any()).optional(),
@@ -76,9 +94,9 @@ export const partialProjectSchema = projectSchema.partial();
 
 // auth credentials
 export const credentialsSchema = z.object({
-  email: z.email().trim(),
-  password: z.string().min(8),
-  name: z.string().trim().optional()
+  email: EmailValidation,
+  password: PasswordValidation,
+  name: z.string().min(3).max(64).trim().optional(),
 });
 
 

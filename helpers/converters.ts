@@ -8,6 +8,7 @@ export function convertToProfileModel(data: any): ProfileModel | null {
             id: data.id,
             name: data.name,
             email: data.email,
+            providers: data.providers ?? [],
             auth_provider: data.auth_provider,
             plan: data.plan,
             meta: data.meta,

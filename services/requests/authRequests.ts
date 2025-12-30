@@ -71,6 +71,7 @@ export async function syncProfile(authUser: User): Promise<ProfileModel | null> 
                 id: authUser.id,
                 name: authUser.user_metadata.name ?? authUser.user_metadata.full_name ?? authUser.email?.split("@")[0] ?? "New User",
                 email: authUser.email,
+                providers: [authUser.app_metadata.provider],
                 auth_provider: authUser.app_metadata.provider,
                 plan: "free",
                 meta: { avatar_url: authUser.user_metadata.avatar_url },
@@ -85,9 +86,21 @@ export async function syncProfile(authUser: User): Promise<ProfileModel | null> 
     }
 
     // Otherwise update last_auth
+    const currentProviders = existing.data.providers ?? [];
+    const provider = authUser.app_metadata.provider;
+
+    const nextProviders = currentProviders.includes(provider)
+        ? currentProviders
+        : [...currentProviders, provider]; // setup the new providers array (make sure no duplicates)
+
     const { data: updated, error } = await supabaseAdmin
         .from("profiles")
-        .update({ last_auth: new Date().toISOString() })
+        .update({
+            last_auth: new Date().toISOString(),
+            auth_provider: provider,
+            providers: nextProviders,
+            updated_at: new Date().toISOString(),
+        })
         .eq("id", authUser.id)
         .select()
         .single();
@@ -186,7 +199,7 @@ export async function requestSignInWithPassword(jsonData: JSONType): Promise<DOE
 ---------------------------------------------------------*/
 export async function requestSignInWithOAuth(provider: Provider, options?: { queryParams?: string }) {
     let redirectUrl: string = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`;
-    if(options?.queryParams) redirectUrl = `${redirectUrl}?${options.queryParams}`;
+    if (options?.queryParams) redirectUrl = `${redirectUrl}?${options.queryParams}`;
 
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider,

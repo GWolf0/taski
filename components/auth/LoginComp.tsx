@@ -128,6 +128,8 @@ function LoginComp() {
                                 name="password"
                                 type="password"
                                 placeholder="Password"
+                                minLength={8}
+                                maxLength={20}
                                 required
                             />
 
