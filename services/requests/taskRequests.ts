@@ -3,7 +3,6 @@
 import { DOE, JSONType } from "@/types/common";
 import { AuthUser, ProjectModel } from "@/types/models";
 import { projectSchema, partialProjectSchema } from "@/helpers/validators";
-import { supabaseClient } from "@/helpers/supabase";
 import { convertToProjectModel } from "@/helpers/converters";
 import {
   canCreateProject,
@@ -12,6 +11,7 @@ import {
   canUpdateProject,
 } from "@/helpers/policies";
 import { filterQuery, PaginatedData } from "@/helpers/query";
+import { supabaseClient } from "@/helpers/supabaseClient";
 
 /* --------------------------------------------------------
    CREATE PROJECT
@@ -62,7 +62,7 @@ export async function requestGetProject(projectId: string, authUser: AuthUser): 
       .eq("id", projectId)
       .single();
 
-    if (error) return { data: null, error: { message: error.message } };
+    if (error) return { data: null, error: { message: "Project not found." } };
 
     const project = convertToProjectModel(data);
 
@@ -73,7 +73,7 @@ export async function requestGetProject(projectId: string, authUser: AuthUser): 
     return { data: project, error: null };
   } catch (error: any) {
     console.error("[getProject] Unexpected error:", error);
-    return { data: null, error: { message: error.message || "Failed to get project" } };
+    return { data: null, error: { message: "Failed to get project" } };
   }
 }
 

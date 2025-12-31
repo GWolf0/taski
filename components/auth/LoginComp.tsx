@@ -18,7 +18,6 @@ import { APP_NAME } from "@/constants/app";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { credentialsSchema, zodGetFirstErrorMessage } from "@/helpers/validators";
-import { supabaseClient } from "@/helpers/supabase";
 
 function LoginComp() {
     const [error, setError] = useState<string | null>(null);
@@ -154,6 +153,7 @@ function LoginComp() {
                                 disabled={isLoading}
                                 onClick={() => onOAuth("google")}
                             >
+                                <i className="bi bi-google mr-1"></i>
                                 Continue with Google
                             </Button>
 
@@ -164,6 +164,7 @@ function LoginComp() {
                                 disabled={isLoading}
                                 onClick={() => onOAuth("github")}
                             >
+                                <i className="bi bi-github mr-1"></i>
                                 Continue with GitHub
                             </Button>
                         </div>

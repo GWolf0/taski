@@ -1,4 +1,5 @@
 import MainLayout from "@/components/layout/MainLayout";
+import PWDResetAuthRedirectHandler from "@/components/misc/PWDResetAuthRedirectHandler";
 import { requestAuthUserProfile } from "@/services/requests/authRequests";
 import { AuthUser } from "@/types/models";
 import Link from "next/link";
@@ -67,6 +68,9 @@ async function HomePage() {
           <li>• Clean separation of domain logic & UI</li>
         </ul>
       </section>
+
+      {/* // handle correct redirecting for password update */}
+      <PWDResetAuthRedirectHandler />
     </MainLayout>
   );
 }

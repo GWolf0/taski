@@ -7,21 +7,21 @@ import { Button } from '../ui/button'
 import NewProjectForm from './NewProjectForm'
 import { Separator } from '../ui/separator'
 
-function NewProjectButton({ authUser, disabled }: {
-    authUser: AuthUser, disabled: boolean,
+function NewProjectButton({ authUser, disabled, large }: {
+    authUser: AuthUser, disabled: boolean, large?: boolean,
 }) {
     const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
 
     return (
         <Dialog defaultOpen={false} open={dialogIsOpen} onOpenChange={(open) => setDialogIsOpen(open)}>
             <DialogTrigger asChild>
-                <Button variant="outline" disabled={dialogIsOpen || disabled}>
+                <Button variant="outline" disabled={dialogIsOpen || disabled} size={large ? "lg" : "default"}>
                     <i className='bi bi-plus-lg'></i>
                     Project
                 </Button>
             </DialogTrigger>
 
-            <DialogContent style={{width: "min(99vw, 480px)"}}>
+            <DialogContent style={{ width: "min(99vw, 480px)" }}>
                 <DialogHeader>
                     <DialogTitle>New Project</DialogTitle>
                     <DialogDescription>

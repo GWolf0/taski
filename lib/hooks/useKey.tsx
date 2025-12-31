@@ -14,10 +14,6 @@ function useKey(key: string, callback: () => void, deps: any[] = [], secondaryKe
 
             if (!mainKeyMatch) return;
 
-            // Ignore inputs / editable fields
-            const target = e.target as HTMLElement
-            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-
             // No modifier required
             if (!secondaryKey) {
                 if (preventDefault) e.preventDefault();

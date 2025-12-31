@@ -2,11 +2,12 @@
 
 import { DOE, JSONType } from "@/types/common";
 import { AuthUser, ProfileModel } from "@/types/models";
-import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
+import { supabaseAdmin } from "@/helpers/supabase";
 import { convertToProfileModel } from "@/helpers/converters";
 import { redirect } from "next/navigation";
 import { Provider, Session, User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { supabaseClient } from "@/helpers/supabaseClient";
 
 /* --------------------------------------------------------
    AUTH USER

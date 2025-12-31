@@ -19,6 +19,11 @@ export default class ThemeService {
         ThemeService.saveTheme(value);
     }
 
+    // get current theme type
+    static getCurrentThemeType(): ThemeType {
+        return ThemeService.isDarkTheme() ? "dark" : "light";
+    }
+
     // assume dark theme if dark class on document element
     static isDarkTheme(): boolean {
         return document.documentElement.classList.contains("dark");

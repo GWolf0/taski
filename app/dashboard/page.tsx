@@ -51,7 +51,7 @@ async function DashboardPage() {
                             <p className="text-sm text-muted-foreground mb-4">
                                 Create a new project to get started
                             </p>
-                            <NewProjectButton authUser={authUser} disabled={!canCreateNewProject} />
+                            <NewProjectButton authUser={authUser} disabled={!canCreateNewProject} large />
                         </div>
                     ) : (
                         <Table>

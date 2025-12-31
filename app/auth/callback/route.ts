@@ -1,7 +1,7 @@
 // app/auth/callback/route.ts
 import { NextResponse } from "next/server";
 import { setupSessionCookies, syncProfile } from "@/services/requests/authRequests";
-import { supabaseClient } from "@/helpers/supabase";
+import { supabaseClient } from "@/helpers/supabaseClient";
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);

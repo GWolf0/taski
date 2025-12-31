@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { APP_NAME } from "@/constants/app";
+import FooterThemeToggler from "../common/FooterThemeToggler";
 
 function MainFooter() {
     const year = new Date().getFullYear();
@@ -11,15 +12,17 @@ function MainFooter() {
                 <div className="flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground md:flex-row">
                     {/* Links */}
                     <div className="flex gap-4">
-                        <Link href="/about" className="hover:text-foreground">
+                        <Link href="/annexe/about" className="hover:text-foreground">
                             About
                         </Link>
-                        <Link href="/privacy" className="hover:text-foreground">
+                        <Link href="/annexe/privacy" className="hover:text-foreground">
                             Privacy Policy
                         </Link>
-                        <Link href="/terms" className="hover:text-foreground">
+                        <Link href="/annexe/terms" className="hover:text-foreground">
                             Terms
                         </Link>
+
+                        <FooterThemeToggler />
                     </div>
 
                     {/* Copyright */}

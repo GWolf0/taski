@@ -3,7 +3,7 @@
 import { DOE, JSONType } from "@/types/common";
 import { AuthUser, ProfileModel } from "@/types/models";
 import { partialProfileSchema } from "@/helpers/validators";
-import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
+import { supabaseAdmin } from "@/helpers/supabase";
 import { convertToProfileModel } from "@/helpers/converters";
 import {
   canDeleteProfile,
@@ -12,6 +12,7 @@ import {
 } from "@/helpers/policies";
 import { filterQuery, PaginatedData } from "@/helpers/query";
 import { requestSignOut } from "./authRequests";
+import { supabaseClient } from "@/helpers/supabaseClient";
 
 /* --------------------------------------------------------
   GET PROFILE

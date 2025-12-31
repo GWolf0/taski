@@ -1,4 +1,5 @@
-import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
+import { supabaseAdmin } from "@/helpers/supabase";
+import { supabaseClient } from "@/helpers/supabaseClient";
 import { syncProfile } from "@/services/requests/authRequests";
 import { DOE } from "@/types/common";
 import { ProfileModel } from "@/types/models";

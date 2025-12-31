@@ -61,5 +61,5 @@ const requireAuthExceptionsPages: string[] = [
     "/tasks/temp"
 ];
 const requireGuestPages: string[] = [
-    "/login", "/forgot-password", "/update-password"
+    "/login", "/auth/forgot-password", "/auth/update-password"
 ];

@@ -1,10 +1,11 @@
-import { supabaseAdmin, supabaseClient } from "@/helpers/supabase";
+import { supabaseAdmin } from "@/helpers/supabase";
 import { requestAuthUser, requestAuthUserProfile, requestSignInWithPassword, requestSignUpWithPassword, syncProfile } from "@/services/requests/authRequests";
 import { DOE } from "@/types/common";
 import { AuthUser, ProfileModel } from "@/types/models";
 import { User } from "@supabase/supabase-js";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { cleanDB, loginAs } from "../helpers/testHelpers";
+import { supabaseClient } from "@/helpers/supabaseClient";
 
 describe("auth requests", () => {
     let start: Date;
