@@ -8,6 +8,7 @@ import { MError } from '@/types/common';
 import { AuthUser, ProjectModel } from '@/types/models';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
+import MainLayout from '../layout/MainLayout';
 
 function SaveTempProjectClientPage({ authUser }: {
     authUser: AuthUser,
@@ -34,7 +35,7 @@ function SaveTempProjectClientPage({ authUser }: {
         const createDoe = await requestCreateProject(tempProject, authUser);
 
         if (createDoe.error) {
-            setSavingStatus(`Error occured`);
+            setSavingStatus(`An error occured`);
             setError(createDoe.error);
         } else {
             if (createDoe.data) {
@@ -49,27 +50,29 @@ function SaveTempProjectClientPage({ authUser }: {
     }
 
     return (
-        <div className='w-full h-screen bg-background flex flex-col gap-4 items-center justify-center'>
-            <ErrorComp error={error} />
+        <MainLayout authUser={authUser}>
+            <div className='w-full h-screen bg-background flex flex-col gap-4 mt-20 items-center'>
+                <ErrorComp error={error} />
 
-            <p className='text-center'>{savingStatus}</p>
+                <p className='text-center'>{savingStatus}</p>
 
-            {loaded &&
-                savedProject ? (
-                <Link href={`/tasks/${savedProject.id}`}>
-                    <Button>
-                        Open Project
-                        <i className='bi bi-arrow-right'></i>
+                {loaded &&
+                    savedProject ? (
+                    <Link href={`/tasks/${savedProject.id}`}>
+                        <Button>
+                            Open Project
+                            <i className='bi bi-arrow-right'></i>
+                        </Button>
+                    </Link>
+                ) : (
+                    <Button onClick={() => window.location.reload()}>
+                        <i className='bi bi-arrow-clockwise'></i>
+                        Retry
                     </Button>
-                </Link>
-            ) : (
-                <Button onClick={() => window.location.reload()}>
-                    <i className='bi bi-arrow-clockwise'></i>
-                    Retry
-                </Button>
-            )
-            }
-        </div>
+                )
+                }
+            </div>
+        </MainLayout>
     );
 
 }

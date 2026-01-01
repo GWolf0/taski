@@ -35,7 +35,7 @@ export default class SaveService {
             if (saved) return saved;
             else throw new Error(`No temp project saved in localstorage`);
         } catch (e: any) {
-            console.error(`Couldn't load temp project | ${e.message}`);
+            console.warn(`Couldn't load temp project | ${e.message}`);
             return TaskService.makeNewProjectInstance("", "New Temp Project");
         }
     }

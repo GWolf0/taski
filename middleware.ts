@@ -55,11 +55,12 @@ export const config = {
 
 // pages that require auth, and others that require guest
 const requireAuthPages: string[] = [
-    "/tasks", "/dashboard", "/save-temp-project"
+    "/tasks", "/dashboard", "/save-temp-project",
 ];
 const requireAuthExceptionsPages: string[] = [
-    "/tasks/temp"
+    "/tasks/temp",
 ];
 const requireGuestPages: string[] = [
-    "/login", "/auth/forgot-password", "/auth/update-password"
+    "/login", "/auth/forgot-password", "/auth/update-password", 
+    "/tasks/temp",
 ];

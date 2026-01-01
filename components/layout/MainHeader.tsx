@@ -10,7 +10,7 @@ function MainHeader({ authUser }: {
 
     return (
         <header className='flex items-center px-2 md:px-4' style={{height: "60px"}}>
-            <Logo size={40} linkToHome />
+            <Logo size={24} linkToHome />
 
             <div className='ml-auto flex items-center'>
                 <HeaderActions authUser={authUser} />

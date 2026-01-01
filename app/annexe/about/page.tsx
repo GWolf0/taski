@@ -38,7 +38,7 @@ function AboutPage() {
                 <ul className="list-disc list-inside space-y-3 text-muted-foreground">
                     <li>Next.js App Router with Server Actions</li>
                     <li>Supabase for authentication and data storage</li>
-                    <li>PostgreSQL with JSONB for flexible data modeling</li>
+                    <li>PostgreSQL with flexible data modeling</li>
                     <li>Role-aware access patterns and secure APIs</li>
                     <li>Deployed on Vercel</li>
                 </ul>

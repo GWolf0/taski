@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -18,16 +18,36 @@ import { APP_NAME } from "@/constants/app";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { credentialsSchema, zodGetFirstErrorMessage } from "@/helpers/validators";
+import Logo from "../layout/Logo";
+
+type LoginPageTabsType = "login" | "register";
 
 function LoginComp() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [tab, setTab] = useState<LoginPageTabsType>("login");
+
+    // get from query params, optional to redirect to a specified route after successful auth
+    const redirect = useRef<string | null>(undefined);
 
     const router = useRouter();
 
-    // get optional redirect query param, for optional redirect after successful login
-    const queryParams = new URLSearchParams(location.href);
-    const redirect: string | null = queryParams.get("redirect");
+    useEffect(() => {
+        // get optional redirect query param, for optional redirect after successful login
+        const queryParams = new URLSearchParams(location.search);
+        const _redirect: string | null = queryParams.get("redirect");
+        redirect.current = _redirect;
+
+        // use hash ("login"|"register")
+        const hash = location.hash.substring(1);
+        if (["login", "register"].includes(hash.toLowerCase())) {
+            setTab(hash.toLowerCase() as LoginPageTabsType);
+        }
+    }, []);
+
+    useEffect(() => {
+        location.hash = `#${tab}`;
+    }, [tab]);
 
     async function onLogin(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -38,7 +58,7 @@ function LoginComp() {
         const jsonData = Object.fromEntries(formData);
         const validatedJsonData = credentialsSchema.safeParse(jsonData);
 
-        if(validatedJsonData.error) {
+        if (validatedJsonData.error) {
             setError(zodGetFirstErrorMessage(validatedJsonData.error));
             setIsLoading(false);
             return;
@@ -52,7 +72,7 @@ function LoginComp() {
             return;
         }
 
-        router.replace(redirect ? `/${redirect}` : "/dashboard");
+        router.replace(redirect.current ? `${redirect.current}` : "/dashboard");
     }
 
     async function onRegister(e: React.FormEvent<HTMLFormElement>) {
@@ -64,7 +84,7 @@ function LoginComp() {
         const jsonData = Object.fromEntries(formData);
         const validatedJsonData = credentialsSchema.safeParse(jsonData);
 
-        if(validatedJsonData.error) {
+        if (validatedJsonData.error) {
             setError(zodGetFirstErrorMessage(validatedJsonData.error));
             setIsLoading(false);
             return;
@@ -78,7 +98,7 @@ function LoginComp() {
             return;
         }
 
-        router.replace(redirect ? `/${redirect}` : "/dashboard");
+        router.replace(redirect.current ? `${redirect.current}` : "/dashboard");
     }
 
     async function onOAuth(provider: Provider) {
@@ -87,16 +107,49 @@ function LoginComp() {
 
         try {
             // pass redirect if exists
-            await requestSignInWithOAuth(provider, { queryParams: redirect ? `redirect=${redirect}` : undefined });
+            await requestSignInWithOAuth(provider, { queryParams: redirect.current ? `redirect=${redirect.current}` : undefined });
             // redirect happens server-side
         } catch (e: any) {
-            setError("OAuth failed");
-            setIsLoading(false);
+            console.warn(`OAuth warn: ${e.message?.toString()}`);
+            // alert(e.message.toString());
+            // setError("OAuth failed");
+            // setIsLoading(false);
         }
     }
 
+    function renderOAuthButtons(): React.ReactNode {
+        return (
+            <div className="space-y-3">
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={() => onOAuth("github")}
+                >
+                    <i className="bi bi-github mr-1"></i>
+                    Sign up with GitHub
+                </Button>
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={() => onOAuth("google")}
+                >
+                    <i className="bi bi-google mr-1"></i>
+                    Sign up with Google
+                </Button>
+            </div>
+        );
+    }
+    
     return (
-        <Card className="w-full max-w-md shadow-lg border" style={{transform: "translateY(-60px)"}}>
+        <Card className="w-full max-w-md shadow-lg border" style={{ transform: "translateY(-60px)" }}>
+            <div className="mx-auto">
+                <Logo size={64} />
+            </div>
+
             <CardHeader>
                 <CardTitle className="text-center text-2xl font-semibold">
                     Welcome to {APP_NAME.toUpperCase()}
@@ -105,10 +158,10 @@ function LoginComp() {
 
             <CardContent>
                 {error && (
-                    <ErrorComp error={{message: error}} />
+                    <ErrorComp error={{ message: error }} />
                 )}
 
-                <Tabs defaultValue="login" className="w-full">
+                <Tabs defaultValue="login" value={tab} onValueChange={(val) => setTab(val as LoginPageTabsType)} className="w-full">
                     <TabsList className="grid grid-cols-2 mb-4">
                         <TabsTrigger value="login">Login</TabsTrigger>
                         <TabsTrigger value="register">Register</TabsTrigger>
@@ -145,29 +198,7 @@ function LoginComp() {
 
                         <Separator className="my-6" />
 
-                        <div className="space-y-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                disabled={isLoading}
-                                onClick={() => onOAuth("google")}
-                            >
-                                <i className="bi bi-google mr-1"></i>
-                                Continue with Google
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                disabled={isLoading}
-                                onClick={() => onOAuth("github")}
-                            >
-                                <i className="bi bi-github mr-1"></i>
-                                Continue with GitHub
-                            </Button>
-                        </div>
+                        {renderOAuthButtons()}
                     </TabsContent>
 
                     {/* REGISTER FORM */}
@@ -184,27 +215,7 @@ function LoginComp() {
 
                         <Separator className="my-6" />
 
-                        <div className="space-y-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                disabled={isLoading}
-                                onClick={() => onOAuth("google")}
-                            >
-                                Sign up with Google
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full"
-                                disabled={isLoading}
-                                onClick={() => onOAuth("github")}
-                            >
-                                Sign up with GitHub
-                            </Button>
-                        </div>
+                        {renderOAuthButtons()}
                     </TabsContent>
                 </Tabs>
             </CardContent>

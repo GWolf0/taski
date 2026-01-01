@@ -7,7 +7,7 @@ export default async function LoginPage() {
     
 
     return (
-        <MainLayout authUser={null} innerClasses="flex items-center justify-center">
+        <MainLayout authUser={null} innerClasses="flex items-center justify-center px-4">
             
             <LoginComp />
 

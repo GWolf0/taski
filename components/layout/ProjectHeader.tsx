@@ -53,7 +53,7 @@ function ProjectHeader() {
     return (
         <header className='w-full flex items-center px-2 md:px-4 gap-4' style={{ height: "60px" }}>
             {/* // Logo */}
-            <Logo />
+            <Logo size={24} />
 
             {/* // project title label edit */}
             <EditableLabel text={project.title} onConfirmed={onNewTitleConfirmed} />

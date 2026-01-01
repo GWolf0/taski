@@ -199,7 +199,7 @@ export async function requestSignInWithPassword(jsonData: JSONType): Promise<DOE
    OAUTH SIGN-IN
 ---------------------------------------------------------*/
 export async function requestSignInWithOAuth(provider: Provider, options?: { queryParams?: string }) {
-    let redirectUrl: string = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`;
+    let redirectUrl: string = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
     if (options?.queryParams) redirectUrl = `${redirectUrl}?${options.queryParams}`;
 
     const { data, error } = await supabaseClient.auth.signInWithOAuth({

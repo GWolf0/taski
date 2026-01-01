@@ -26,7 +26,7 @@ function TasksClientPage({project, authUser, isTempProject}: {
     function renderTempProjectNotice(): React.ReactNode {
         return (
             <div className='w-full px-2 py-0.5 bg-amber-400 text-gray-900 text-xs text-center'>
-                This is a temporary project, please <a className='underline hover:opacity-70 font-semibold' href={`/login?redirect=/save-temp-project`} target="_blank">login</a> to save this project.
+                This is a temporary project, please <a className='underline hover:opacity-70 font-semibold' href={`/login?redirect=/save-temp-project#register`} target="_blank">login</a> to save this project.
             </div>
         )
     }
