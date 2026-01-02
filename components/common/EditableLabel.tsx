@@ -59,6 +59,7 @@ function EditableLabel({ text, onConfirmed, onCanceled }: {
                 <span
                     className="cursor-pointer select-none hover:bg-muted px-1 rounded-sm transition text-sm font-medium"
                     onDoubleClick={() => setEditing(true)}
+                    title={"[dbl-click] edit"}
                 >
                     {text}
                 </span>

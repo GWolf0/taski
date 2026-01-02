@@ -1,5 +1,6 @@
 import MainLayout from "@/components/layout/MainLayout";
 import PWDResetAuthRedirectHandler from "@/components/misc/PWDResetAuthRedirectHandler";
+import { APP_NAME } from "@/constants/app";
 import { requestAuthUserProfile } from "@/services/requests/authRequests";
 import { AuthUser } from "@/types/models";
 import { InfoIcon } from "lucide-react";
@@ -12,7 +13,15 @@ async function HomePage() {
     <MainLayout authUser={authUser}>
       {/* HERO */}
       <section className="max-w-5xl mx-auto px-4 pt-24 pb-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+        <h2 className="text-5xl md:text-6xl bg-foreground text-background font-extralight tracking-widest uppercase -rotate-4
+          rounded-full px-8 py-4 shadow-lg shadow-amber-500 w-fit mx-auto">
+          {APP_NAME.substring(0, APP_NAME.length - 1)}
+          <span className="lowercase">
+            {APP_NAME.at(-1)}
+          </span>
+        </h2>
+
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mt-8">
           Task management, <span className="text-primary">done right</span>
         </h1>
 

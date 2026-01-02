@@ -130,6 +130,7 @@ export async function requestGetUserProjectsCount(userId: string, authUser: Auth
 ---------------------------------------------------------*/
 export async function requestUpdateProject(projectId: string, jsonData: JSONType, authUser: AuthUser): Promise<DOE<ProjectModel>> {
   try {
+    console.log(`Try update project`, projectId, authUser?.id);
     const projectResp = await requestGetProject(projectId, authUser);
     if (!projectResp.data) return { data: null, error: { message: "Project not found" } };
 

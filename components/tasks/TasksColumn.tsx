@@ -27,7 +27,12 @@ export default function TasksColumn({ columnName, tasks, collapsed, onToggle }: 
 
     useEffect(() => {
         // if selectedTask is not undefinded (means a task is selected for edit), then turn adding off
-        if (selectedTask != undefined) setAdding(false);
+        // and update the input value manually (since it's uncontrolleed)
+        if (selectedTask != undefined) {
+            setAdding(false);
+            if(inputRef.current)
+                inputRef.current.value = tasks.find(t => t.id === selectedTask?.id)?.text ?? "";
+        }
     }, [selectedTask]);
 
     const addTask = () => {
