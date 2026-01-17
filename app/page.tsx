@@ -84,7 +84,7 @@ async function HomePage() {
         </h2>
 
         <ul className="space-y-4 text-muted-foreground rounded-lg p-4 border">
-          <span className="italic underline mb-2 block text-foreground">Version 1 — (Nov 2025 → Jan 2026)</span>
+          <span className="italic underline mb-2 block text-foreground">Version 0.5.5 — (Nov 2025 → Jan 2026)</span>
 
           <li>• Kanban-style task organization (To Do, Doing, Done)</li>
           <li>• Temporary access for unauthenticated users</li>

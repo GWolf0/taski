@@ -56,7 +56,7 @@ export default function TasksColumnsContainer() {
                 ...project.data,
                 columns: newColumns,
             },
-        });
+        }, true); // set dirty
     };
 
     return (

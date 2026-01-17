@@ -6,9 +6,9 @@ import { AUTH_REDIRECT, GUEST_REDIRECT } from '@/constants/routes';
 import { User } from '@supabase/supabase-js';
 import { requestAuthUser } from './services/requests/authRequests';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const res = NextResponse.next();
-
+    
     try {
         const pathname = request.nextUrl.pathname;
 
@@ -47,10 +47,6 @@ export async function middleware(request: NextRequest) {
         console.error("[Middleware] Unexpected error:", err);
         return NextResponse.redirect(new URL("/", request.url)); // fail-open
     }
-}
-
-export const config = {
-    runtime: "edge",
 }
 
 // pages that require auth, and others that require guest

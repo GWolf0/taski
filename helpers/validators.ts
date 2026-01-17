@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { AccountPlan } from "@/constants/limits";
 import { ProjectData, TaskItem } from "@/types/tasks";
-import { ProfileModel } from "@/types/models";
+import { ProfileModel, ProjectModel } from "@/types/models";
 import { Provider } from "@supabase/supabase-js";
 
 const TRUSTED_EMAIL_DOMAINS = [
@@ -70,7 +70,7 @@ export const taskItemSchema: z.ZodType<TaskItem> = z.object({
 });
 
 export const projectDataSchema: z.ZodType<ProjectData> = z.object({
-  v: z.number(),
+  v: z.string(),
   columns: z.object({
     todo: z.array(taskItemSchema),
     doing: z.array(taskItemSchema),

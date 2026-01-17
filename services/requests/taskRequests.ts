@@ -2,7 +2,7 @@
 
 import { DOE, JSONType } from "@/types/common";
 import { AuthUser, ProjectModel } from "@/types/models";
-import { projectSchema, partialProjectSchema } from "@/helpers/validators";
+import { projectSchema, partialProjectSchema, zodGetFirstErrorMessage } from "@/helpers/validators";
 import { convertToProjectModel } from "@/helpers/converters";
 import {
   canCreateProject,
@@ -30,7 +30,8 @@ export async function requestCreateProject(jsonData: JSONType, authUser: AuthUse
 
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
-      return { data: null, error: { message: "Validation failed", errors } };
+      const msg = zodGetFirstErrorMessage(parsed.error);
+      return { data: null, error: { message: `Validation failed (${msg})`, errors } };
     }
     
     const { data, error } = await supabaseClient

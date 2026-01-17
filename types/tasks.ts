@@ -7,7 +7,7 @@ export interface TaskItem {
 export type TasksColumnType = "todo" | "doing" | "done";
 
 export interface ProjectData {
-    v: number,
+    v: string,
     columns: Record<TasksColumnType, TaskItem[]>,
 }
 
